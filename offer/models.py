@@ -6,7 +6,7 @@ from user.models import User
 
 
 def upload_location(instance, filename):
-    return "item-%s/%s" %(instance.id, filename)
+    return "item ID %s/%s" %(instance.item.id, filename)
 
 
 class Offer(models.Model):

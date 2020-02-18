@@ -21,11 +21,13 @@ from rest_framework import routers
 from rest_framework.authtoken import views
 
 from item.views import ItemViewSet
+from offer.views import OfferViewSet
 from user.views import UserViewSet
 
 router = routers.DefaultRouter()
 router.register(r'users', UserViewSet)
 router.register(r'items', ItemViewSet)
+router.register(r'offers', OfferViewSet)
 
 
 urlpatterns = [

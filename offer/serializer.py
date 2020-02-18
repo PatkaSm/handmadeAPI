@@ -4,10 +4,13 @@ from rest_framework import serializers
 from item.models import Item
 from item.serializer import ItemSerializer
 from offer.models import Offer
+from tag.models import Tag
+from tag.serializer import TagSerializer
 
 
 class OfferSerializer(serializers.ModelSerializer):
     item = ItemSerializer()
+    tag = TagSerializer()
 
     class Meta:
         model = Offer
@@ -15,8 +18,11 @@ class OfferSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         item_data = validated_data.pop('item')
-        offer = Offer.objects.create(**validated_data)
-        Item.objects.create(**item_data)
+        tags_data = validated_data.pop('tag')
+        item = Item.objects.create(**item_data)
+        offer = Offer.objects.create(item=item, **validated_data)
+        for tag_data in tags_data:
+            Tag.objects.create(offer=offer, **tag_data)
         return offer
 
     def update(self, instance, validated_data):

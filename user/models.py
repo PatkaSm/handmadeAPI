@@ -51,7 +51,7 @@ class UserManager(BaseUserManager):
 
 
 def upload_location(instance, filename):
-    return "%s/%s" %(instance.id, filename)
+    return "user ID %s/%s" %(instance.id, filename)
 
 
 class User(AbstractBaseUser):
