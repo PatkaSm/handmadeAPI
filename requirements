@@ -2,4 +2,4 @@ Django~=2.2.4
 djangrestframework
 markdown
 django-filter
-django-taggit
+Pillow

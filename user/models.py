@@ -8,7 +8,8 @@ from rest_framework.authtoken.models import Token
 
 
 class UserManager(BaseUserManager):
-    def create_user(self, email, nickname, first_name, last_name, password=None, is_admin=False):
+    def create_user(self, email, nickname, first_name, last_name, password=None,is_staff=False,
+                    is_admin=False):
         if not email:
             raise ValueError("Musisz podać swój e-mail!")
         if not nickname:
@@ -20,8 +21,21 @@ class UserManager(BaseUserManager):
         user_obj.nickname = nickname
         user_obj.first_name = first_name
         user_obj.last_name = last_name
+        user_obj.staff = is_staff
+        user_obj.admin = is_admin
         user_obj.save(using=self._db)
         return user_obj
+
+    def create_staffuser(self, nickname, email, first_name, last_name, password=None):
+        user = self.create_user(
+            email,
+            nickname=nickname,
+            first_name=first_name,
+            last_name=last_name,
+            password=password,
+            is_staff=True
+        )
+        return user
 
     def create_superuser(self, nickname, first_name, last_name, email, password=None):
         user = self.create_user(
@@ -31,8 +45,13 @@ class UserManager(BaseUserManager):
             last_name=last_name,
             password=password,
             is_admin=True,
+            is_staff=True,
         )
         return user
+
+
+def upload_location(instance, filename):
+    return "%s/%s" %(instance.id, filename)
 
 
 class User(AbstractBaseUser):
@@ -42,10 +61,15 @@ class User(AbstractBaseUser):
     last_name = models.CharField(max_length=255)
     active = models.BooleanField(default=True)
     admin = models.BooleanField(default=False)
+    staff = models.BooleanField(default=False)
+    phone_number = models.IntegerField(null=True)
+    city = models.CharField(max_length=255, null=True)
+    image = models.ImageField(null=True, blank=True, max_length=None, upload_to=upload_location)
 
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = ['nickname', 'first_name', 'last_name']
 
-    USERNAME_FIELD = 'email'  # assigning an email as a username
-    REQUIRED_FIELDS = ['nickname', 'first_name', 'last_name']  # set as necessary for filling
+    objects = UserManager()
 
     def __str__(self):
         return self.first_name + " " + self.last_name
@@ -64,17 +88,12 @@ class User(AbstractBaseUser):
     def is_admin(self):
         return self.admin
 
-    @receiver(post_save, sender=settings.AUTH_USER_MODEL)
-    def create_auth_token(sender, instance=None, created=False, **kwargs):
-        if created:
-            Token.objects.create(user=instance)
+    @property
+    def is_staff(self):
+        return self.staff
 
 
-class Profile(models.Model):
-    user = models.OneToOneField(User)
-    phone_number = models.IntegerField(null=True)
-    city = models.CharField(max_length=255, null=True)
-    street = models.CharField(max_length=255, null=True)
-    house_number = models.CharField(max_length=20, null=True)
-    postOffice_number = models.CharField(max_length=6, null=True)
-    image = models.ImageField(upload_to=)
+@receiver(post_save, sender=settings.AUTH_USER_MODEL)
+def create_auth_token(sender, instance=None, created=False, **kwargs):
+    if created:
+        Token.objects.create(user=instance)
