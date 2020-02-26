@@ -20,14 +20,20 @@ from django.urls import path, include
 from rest_framework import routers
 from rest_framework.authtoken import views
 
+from favourites.views import FavouriteViewSet
 from item.views import ItemViewSet
 from offer.views import OfferViewSet
+from tag.views import TagViewSet
+from upload_image.views import ImageViewSet
 from user.views import UserViewSet
 
 router = routers.DefaultRouter()
 router.register(r'users', UserViewSet)
 router.register(r'items', ItemViewSet)
 router.register(r'offers', OfferViewSet)
+router.register(r'tags', TagViewSet)
+router.register(r'favourites', FavouriteViewSet)
+router.register(r'upload_images', ImageViewSet)
 
 
 urlpatterns = [
