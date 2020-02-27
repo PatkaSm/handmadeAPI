@@ -78,7 +78,7 @@ class OfferViewSet(viewsets.ModelViewSet):
         if self.action == 'delete_offer':
             self.permission_classes = [IsAuthenticated, IsObjectOwnerOrAdmin]
         if self.action == 'offers_by_category' or self.action == 'offer_detail':
-            self.permission_classes = [IsAdmin]
+            self.permission_classes = [AllowAny]
         return [permission() for permission in self.permission_classes]
 
 

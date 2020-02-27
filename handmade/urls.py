@@ -20,6 +20,7 @@ from django.urls import path, include
 from rest_framework import routers
 from rest_framework.authtoken import views
 
+from chatApp.views import ChatViewSet
 from favourites.views import FavouriteViewSet
 from item.views import ItemViewSet
 from offer.views import OfferViewSet
@@ -34,6 +35,7 @@ router.register(r'offers', OfferViewSet)
 router.register(r'tags', TagViewSet)
 router.register(r'favourites', FavouriteViewSet)
 router.register(r'upload_images', ImageViewSet)
+router.register(r'messages', ChatViewSet)
 
 
 urlpatterns = [
