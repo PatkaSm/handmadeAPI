@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'favourites',
     'upload_image',
     'chatApp',
+    'category',
 
 ]
 
