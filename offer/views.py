@@ -62,7 +62,7 @@ class OfferViewSet(viewsets.ModelViewSet):
         if len(request.GET) < 1:
             return Response(data={'failed': 'Nie podano kategorii'}, status=status.HTTP_406_NOT_ACCEPTABLE)
         category = request.GET['category']
-        offers = Offer.objects.filter(item__category=category, owner__active=True)
+        offers = Offer.objects.filter(item__category__name=category, owner__active=True)
         data = Offer.get_offer_data(request, offers)
         return JsonResponse(data=data, safe=False)
 

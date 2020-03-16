@@ -1,6 +1,4 @@
 from django.db import models
-from rest_framework.utils import json
-
 
 from item.models import Item
 from tag.models import Tag
@@ -30,7 +28,7 @@ class Offer(models.Model):
             image = upload_image.models.Image.objects.filter(offer=offer.id)
             for img in image:
                 serializer = upload_image.serializer.ImageSerializer(img)
-                images.append(json.dumps(str(serializer.data['img'])))
+                images.append('http://' + request.get_host() + serializer.data['img'])
             if not request.user.is_authenticated:
                 is_favourite = False
             else:
@@ -47,7 +45,7 @@ class Offer(models.Model):
                 'item': {
                     'id': offer.item_id,
                     'name': offer.item.name,
-                    'category': offer.item.category,
+                    'category': offer.item.category.name,
                 },
                 'amount': offer.amount,
                 'price': offer.price,

@@ -14,24 +14,10 @@ class CategoryViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['get'], url_name='categories', url_path='categories')
     def get_category(self, request):
+        categories = Category.objects.filter(parent=None)
         data = []
-        categories = list(Category.objects.filter(parent=None))
-        for root_index, category in enumerate(categories):
-            children = list(Category.objects.filter(parent=category))
-            data.append({
-                "name": category.name,
-                "children": []
-            })
-            for child_index, child in enumerate(children):
-                data[root_index]["children"].append({
-                    "name": child.name,
-                    "children": []
-                })
-                second_childrens = list(Category.objects.filter(parent=child))
-                for second_child in second_childrens:
-                    data[root_index]["children"][child_index]["children"].append({
-                        "name": second_child.name
-                    })
+        for root in categories:
+            data.append(CategorySerializer(root).data)
         return JsonResponse(data=data, status=200, safe=False)
 
     def get_permissions(self):
