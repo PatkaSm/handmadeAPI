@@ -39,6 +39,7 @@ class OfferViewSet(viewsets.ModelViewSet):
     def offer_detail(self, request, **kwargs):
         offer = get_object_or_404(Offer, id=kwargs.get('offer_id'))
         serializer = OfferSerializer(offer)
+        print(request.body)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['put'], url_name='update', url_path='offer/update/(?P<offer_id>\d+)')
