@@ -6,4 +6,4 @@ from favourites.models import Favourite
 class FavouriteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Favourite
-        fields = ['offer']
+        fields = ['offer', 'user']

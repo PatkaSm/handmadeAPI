@@ -39,7 +39,6 @@ class OfferViewSet(viewsets.ModelViewSet):
     def offer_detail(self, request, **kwargs):
         offer = get_object_or_404(Offer, id=kwargs.get('offer_id'))
         serializer = OfferSerializer(offer)
-        print(request.body)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['put'], url_name='update', url_path='offer/update/(?P<offer_id>\d+)')
@@ -64,14 +63,14 @@ class OfferViewSet(viewsets.ModelViewSet):
             return Response(data={'failed': 'Nie podano kategorii'}, status=status.HTTP_406_NOT_ACCEPTABLE)
         category = request.GET['category']
         offers = Offer.objects.filter(item__category__name=category, owner__active=True)
-        data = Offer.get_offer_data(request, offers)
-        return JsonResponse(data=data, safe=False)
+        serializer = OfferSerializer(offers, many=True)
+        return JsonResponse(data=serializer.data, safe=False)
 
     @action(detail=False, methods=['get'], url_name='user_offers', url_path='user_offers')
     def user_offers(self, request):
         offers = Offer.objects.filter(owner=request.user, owner__active=True)
-        data = Offer.get_offer_data(request, offers)
-        return JsonResponse(data=data, safe=False)
+        serializer = OfferSerializer(offers, many=True)
+        return JsonResponse(data=serializer.data, safe=False)
 
     def get_permissions(self):
         if self.action == 'user_offers' or self.action == 'update_offer' or self.action == 'create_offer':

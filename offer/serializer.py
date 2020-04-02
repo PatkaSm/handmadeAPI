@@ -1,4 +1,6 @@
 from rest_framework import serializers
+
+from favourites.models import Favourite
 from item.models import Item
 from item.serializer import ItemSerializer
 from offer.models import Offer, Comment
@@ -6,6 +8,7 @@ from tag.models import Tag
 from tag.serializer import TagSerializer
 from upload_image.models import Image
 from upload_image.serializer import ImageSerializer
+from user.serializer import UserSerializer
 
 
 class CommentSerializer(serializers.ModelSerializer):
@@ -19,10 +22,12 @@ class OfferSerializer(serializers.ModelSerializer):
     tag = TagSerializer(many=True)
     comments = serializers.SerializerMethodField()
     images = serializers.SerializerMethodField()
+    is_favourite = serializers.SerializerMethodField()
+    liked_by = serializers.SerializerMethodField()
 
     class Meta:
         model = Offer
-        fields = ['owner', 'item', 'amount', 'price', 'tag', 'comments', 'images']
+        fields = ['owner', 'item', 'amount', 'price', 'tag', 'comments', 'images', 'is_favourite', 'liked_by']
 
     def get_comments(self, obj):
         offer_comment = Comment.objects.filter(id=obj.id)
@@ -33,6 +38,25 @@ class OfferSerializer(serializers.ModelSerializer):
         offer_images = Image.objects.filter(id=obj.id)
         serializer = ImageSerializer(offer_images, many=True)
         return serializer.data
+
+    def get_is_favourite(self, obj):
+        is_favourite = Favourite.objects.filter(offer=obj.id, user=self.context['request'].user)
+        if is_favourite.exists():
+            return True
+        return False
+
+    def get_liked_by(self, obj):
+        users = []
+        is_favourite = Favourite.objects.filter(offer=obj.id).select_related('user')
+        likes = is_favourite.count()
+        for fav in is_favourite:
+            serializer = UserSerializer(fav.user)
+            users.append(serializer.data)
+        data = {
+            'users': users,
+            'likes': likes
+        }
+        return data
 
     def create(self, validated_data):
         item_data = validated_data.pop('item')
