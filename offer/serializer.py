@@ -28,6 +28,7 @@ class OfferSerializer(serializers.ModelSerializer):
     class Meta:
         model = Offer
         fields = ['owner', 'item', 'amount', 'price', 'tag', 'comments', 'images', 'is_favourite', 'liked_by']
+        read_only_fields = ['owner']
 
     def get_comments(self, obj):
         offer_comment = Comment.objects.filter(id=obj.id)
@@ -35,7 +36,7 @@ class OfferSerializer(serializers.ModelSerializer):
         return serializer.data
 
     def get_images(self, obj):
-        offer_images = Image.objects.filter(id=obj.id)
+        offer_images = Image.objects.filter(offer=obj.id)
         serializer = ImageSerializer(offer_images, many=True)
         return serializer.data
 
@@ -69,21 +70,28 @@ class OfferSerializer(serializers.ModelSerializer):
         return offer
 
     def update(self, instance, validated_data):
-        item_data = validated_data.pop('item')
-        item = instance.item
-        tags_data = validated_data.pop('tag')
-        tag = instance.tag
+        if 'item' in validated_data.keys():
+            item_data = validated_data.pop('item')
+            item = instance.item
+
+            item.name = item_data.get('name', item.name)
+            item.category = item_data.get('category', item.category)
+            item.save()
+
+        if 'tag' in validated_data.keys():
+            tags_data = validated_data.pop('tag')
+            instance.tag.clear()
+
+            for tag_data in tags_data:
+                tag = Tag.objects.create(**tag_data)
+                instance.tag.add(tag)
+
+
 
         instance.amount = validated_data.get('amount', instance.amount)
         instance.price = validated_data.get('price', instance.price)
         instance.save()
 
-        for tag_data in tags_data:
-            tag.word = tags_data.get('word', tag_data.tag)
-        tag.save()
-        item.name = item_data.get('name', item.name)
-        item.category = item_data.get('category', item.category)
-        item.save()
 
         return instance
 

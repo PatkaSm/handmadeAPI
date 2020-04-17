@@ -8,6 +8,7 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 
 from rest_framework.response import Response
 
+from upload_image.models import Image
 from upload_image.serializer import ImageSerializer
 from .permissions import IsObjectOwnerOrAdmin, IsAdmin
 from offer.models import Offer
@@ -20,15 +21,11 @@ class OfferViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['post'], url_name='create', url_path='create')
     def create_offer(self, request):
-        offer_data = request.data['offer']
-        offer_data = json.loads(offer_data)
-        offer_data['owner'] = request.user.id
-        offer_serializer = OfferSerializer(data=offer_data)
+        offer_serializer = OfferSerializer(data=request.data['offer'])
         if not offer_serializer.is_valid():
             return Response(data=offer_serializer.errors, status=status.HTTP_406_NOT_ACCEPTABLE)
-        offer = offer_serializer.save(owner=request.user)
-        image_data = {'img': request.data['image'], 'offer': offer.id}
-        image_serializer = ImageSerializer(data=image_data)
+        offer = offer_serializer.save(owner=request.user, context={'request': request})
+        image_serializer = ImageSerializer(data=request.data['image'])
         if not image_serializer.is_valid():
             return Response(data=image_serializer.errors, status=status.HTTP_406_NOT_ACCEPTABLE)
         image_serializer.save(offer=offer)
@@ -43,11 +40,12 @@ class OfferViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['put'], url_name='update', url_path='offer/update/(?P<offer_id>\d+)')
     def update_offer(self, request, **kwargs):
+        offer_data = request.data['offer']
         offer = Offer.objects.get(id=kwargs.get('offer_id'))
-        serializer = OfferSerializer(offer, data=request.data, partial=True)
+        serializer = OfferSerializer(offer, data=offer_data, partial=True, context={'request': request})
         if not serializer.is_valid():
             return Response(data=serializer.errors, status=status.HTTP_406_NOT_ACCEPTABLE)
-        serializer.update(offer, serializer.validated_data)
+        serializer.update(offer, serializer.validated_data, )
         return Response(data=serializer.data, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['delete'], url_name='delete_offer', url_path='offer/delete/(?P<offer_id>\d+)')

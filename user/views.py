@@ -20,8 +20,9 @@ class UserViewSet(viewsets.ModelViewSet):
         return Response(data=serializer.data, status=status.HTTP_201_CREATED)
 
     @action(detail=False, methods=['put'], url_name='update', url_path='user/edit/(?P<user_id>\d+)')
-    def edit_user(self, request):
-        serializer = UserSerializer(request.user, data=request.data, partial=True)
+    def edit_user(self, request, **kwargs):
+        user = get_object_or_404(User.objects.filter(id=kwargs.get('user_id')))
+        serializer = UserSerializer(user, data=request.data, partial=True)
         if not serializer.is_valid():
             return Response(data=serializer.data, status=status.HTTP_406_NOT_ACCEPTABLE)
         serializer.update(instance=request.user, validated_data=serializer.validated_data)
