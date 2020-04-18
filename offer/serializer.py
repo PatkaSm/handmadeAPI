@@ -8,7 +8,6 @@ from tag.models import Tag
 from tag.serializer import TagSerializer
 from upload_image.models import Image
 from upload_image.serializer import ImageSerializer
-from user.serializer import UserSerializer
 
 
 class CommentSerializer(serializers.ModelSerializer):
@@ -41,9 +40,10 @@ class OfferSerializer(serializers.ModelSerializer):
         return serializer.data
 
     def get_is_favourite(self, obj):
-        is_favourite = Favourite.objects.filter(offer=obj.id, user=self.context['request'].user)
-        if is_favourite.exists():
-            return True
+        if self.context['request'].user.is_authenticated:
+            is_favourite = Favourite.objects.filter(offer=obj.id, user=self.context['request'].user)
+            if is_favourite.exists():
+                return True
         return False
 
     def get_liked_by(self, obj):
@@ -51,8 +51,7 @@ class OfferSerializer(serializers.ModelSerializer):
         is_favourite = Favourite.objects.filter(offer=obj.id).select_related('user')
         likes = is_favourite.count()
         for fav in is_favourite:
-            serializer = UserSerializer(fav.user)
-            users.append(serializer.data)
+            users.append(fav.user.nickname)
         data = {
             'users': users,
             'likes': likes
@@ -86,12 +85,9 @@ class OfferSerializer(serializers.ModelSerializer):
                 tag = Tag.objects.create(**tag_data)
                 instance.tag.add(tag)
 
-
-
         instance.amount = validated_data.get('amount', instance.amount)
         instance.price = validated_data.get('price', instance.price)
         instance.save()
-
 
         return instance
 

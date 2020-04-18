@@ -1,7 +1,5 @@
-import json
-
 from django.http import JsonResponse
-from rest_framework import status, viewsets
+from rest_framework import status, viewsets, filters
 from rest_framework.decorators import action
 from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated, AllowAny
@@ -18,6 +16,8 @@ from offer.serializer import OfferSerializer
 class OfferViewSet(viewsets.ModelViewSet):
     queryset = Offer.objects.filter(owner__active=True)
     serializer_class = OfferSerializer
+    filter_backends = [filters.SearchFilter]
+    search_fields = ['tag__word']
 
     @action(detail=False, methods=['post'], url_name='create', url_path='create')
     def create_offer(self, request):
@@ -45,7 +45,12 @@ class OfferViewSet(viewsets.ModelViewSet):
         serializer = OfferSerializer(offer, data=offer_data, partial=True, context={'request': request})
         if not serializer.is_valid():
             return Response(data=serializer.errors, status=status.HTTP_406_NOT_ACCEPTABLE)
-        serializer.update(offer, serializer.validated_data, )
+        images = Image.objects.filter(offer=offer)
+        images_data = request.data['images']
+        img_serializer = ImageSerializer(images, data = images_data, partial=True, many=True)
+        if not img_serializer.is_valid():
+            return Response(data=img_serializer.errors, status=status.HTTP_406_NOT_ACCEPTABLE)
+        serializer.update(offer, serializer.validated_data)
         return Response(data=serializer.data, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['delete'], url_name='delete_offer', url_path='offer/delete/(?P<offer_id>\d+)')
