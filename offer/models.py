@@ -19,6 +19,7 @@ class Offer(models.Model):
     price = models.DecimalField(max_digits=10, decimal_places=2)
     tag = models.ManyToManyField(Tag)
     gender = models.CharField(max_length=255, choices=choices, default='Wszyscy')
+    date = models.DateField(auto_now=True)
 
 
 class Comment(models.Model):

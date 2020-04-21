@@ -1,4 +1,5 @@
 from django.http import JsonResponse
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import status, viewsets, filters
 from rest_framework.decorators import action
 from rest_framework.generics import get_object_or_404
@@ -8,7 +9,7 @@ from rest_framework.response import Response
 
 from upload_image.models import Image
 from upload_image.serializer import ImageSerializer
-from .permissions import IsObjectOwnerOrAdmin, IsAdmin
+from .permissions import IsObjectOwnerOrAdmin
 from offer.models import Offer
 from offer.serializer import OfferSerializer
 
@@ -16,8 +17,10 @@ from offer.serializer import OfferSerializer
 class OfferViewSet(viewsets.ModelViewSet):
     queryset = Offer.objects.filter(owner__active=True)
     serializer_class = OfferSerializer
-    filter_backends = [filters.SearchFilter]
-    search_fields = ['tag__word']
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter, DjangoFilterBackend]
+    search_fields = ['tag__word', 'item__name']
+    ordering_fields = ['price', 'date']
+    filterset_fields = ['price', 'item__color', 'item__ready_in', 'item__shipping_abroad']
 
     @action(detail=False, methods=['post'], url_name='create', url_path='create')
     def create_offer(self, request):
@@ -66,7 +69,7 @@ class OfferViewSet(viewsets.ModelViewSet):
             return Response(data={'failed': 'Nie podano kategorii'}, status=status.HTTP_406_NOT_ACCEPTABLE)
         category = request.GET['category']
         offers = Offer.objects.filter(item__category__name=category, owner__active=True)
-        serializer = OfferSerializer(offers, many=True)
+        serializer = OfferSerializer(offers, many=True, context={'request': request})
         return JsonResponse(data=serializer.data, safe=False)
 
     @action(detail=False, methods=['get'], url_name='user_offers', url_path='user_offers')

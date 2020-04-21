@@ -12,12 +12,6 @@ class UserSerializer(serializers.ModelSerializer):
     def create(self, validates_data):
         return User.objects.create_user(**validates_data)
 
-    def createStaffUser(self, validates_data):
-        return User.objects.create_staffuser(**validates_data)
-
-    def createAdminUser(self, validates_data):
-        return User.objects.create_superuser(**validates_data)
-
     def update(self, instance, validated_data):
         instance.email = validated_data.get('email', instance.email)
         instance.first_name = validated_data.get('first_name', instance.first_name)

@@ -8,8 +8,8 @@ from rest_framework.authtoken.models import Token
 
 
 class UserManager(BaseUserManager):
-    def create_user(self, email, nickname, first_name, last_name, password=None,is_staff=False,
-                    is_admin=False):
+    def create_user(self, email, nickname, first_name, last_name, phone_number, city, image=None, password=None,
+                    is_staff=False, is_admin=False):
         if not email:
             raise ValueError("Musisz podać swój e-mail!")
         if not nickname:
@@ -21,28 +21,25 @@ class UserManager(BaseUserManager):
         user_obj.nickname = nickname
         user_obj.first_name = first_name
         user_obj.last_name = last_name
+        user_obj.phone_number = phone_number
+        user_obj.city = city
+        if image is not None:
+            user_obj.image = image
         user_obj.staff = is_staff
         user_obj.admin = is_admin
         user_obj.save(using=self._db)
         return user_obj
 
-    def create_staffuser(self, nickname, email, first_name, last_name, password=None):
+    def create_superuser(self, nickname, first_name, last_name, phone_number=None, city=None, image=None, email=None,
+                         password=None):
         user = self.create_user(
             email,
             nickname=nickname,
             first_name=first_name,
             last_name=last_name,
-            password=password,
-            is_staff=True
-        )
-        return user
-
-    def create_superuser(self, nickname, first_name, last_name, email, password=None):
-        user = self.create_user(
-            email,
-            nickname=nickname,
-            first_name=first_name,
-            last_name=last_name,
+            phone_number=phone_number,
+            city=city,
+            image=image,
             password=password,
             is_admin=True,
             is_staff=True,
@@ -52,6 +49,10 @@ class UserManager(BaseUserManager):
 
 def upload_location(instance, filename):
     return "user ID %s/%s" %(instance.id, filename)
+
+
+def default_place_pics():
+    return "default.png"
 
 
 class User(AbstractBaseUser):
@@ -64,7 +65,12 @@ class User(AbstractBaseUser):
     staff = models.BooleanField(default=False)
     phone_number = models.IntegerField(null=True)
     city = models.CharField(max_length=255, null=True)
-    image = models.ImageField(null=True, blank=True, max_length=None, upload_to=upload_location)
+    image = models.ImageField(default='default.png', upload_to=upload_location, blank=True)
+
+    def get_image(self):
+        if not self.image:
+            return default_place_pics
+        return self.image
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['nickname', 'first_name', 'last_name']

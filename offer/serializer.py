@@ -8,6 +8,7 @@ from tag.models import Tag
 from tag.serializer import TagSerializer
 from upload_image.models import Image
 from upload_image.serializer import ImageSerializer
+from user.serializer import UserSerializer
 
 
 class CommentSerializer(serializers.ModelSerializer):
@@ -23,11 +24,13 @@ class OfferSerializer(serializers.ModelSerializer):
     images = serializers.SerializerMethodField()
     is_favourite = serializers.SerializerMethodField()
     liked_by = serializers.SerializerMethodField()
+    owner = UserSerializer(read_only=True, many=False)
 
     class Meta:
         model = Offer
-        fields = ['owner', 'item', 'amount', 'price', 'tag', 'comments', 'images', 'is_favourite', 'liked_by']
+        fields = ['owner', 'item', 'amount', 'price', 'tag', 'comments', 'images', 'date', 'is_favourite', 'liked_by']
         read_only_fields = ['owner']
+
 
     def get_comments(self, obj):
         offer_comment = Comment.objects.filter(id=obj.id)
@@ -37,7 +40,10 @@ class OfferSerializer(serializers.ModelSerializer):
     def get_images(self, obj):
         offer_images = Image.objects.filter(offer=obj.id)
         serializer = ImageSerializer(offer_images, many=True)
-        return serializer.data
+        images = []
+        for offers in serializer.data:
+            images.append(('http://' + self.context['request'].get_host() + offers['img']))
+        return images
 
     def get_is_favourite(self, obj):
         if self.context['request'].user.is_authenticated:
