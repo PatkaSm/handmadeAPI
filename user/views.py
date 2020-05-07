@@ -28,9 +28,21 @@ class UserViewSet(viewsets.ModelViewSet):
         serializer.update(instance=request.user, validated_data=serializer.validated_data)
         return Response(data=serializer.data, status=status.HTTP_200_OK)
 
-    @action(detail=False, methods=['get'], url_name='user_details')
-    def user_details(self, request):
-        serializer = UserSerializer(data=request.user)
+    @action(detail=False, methods=['get'], url_name='user_details', url_path='user/(?P<user_id>\d+)')
+    def user_details(self, request, **kwargs):
+        user = get_object_or_404(User.objects.filter(id=kwargs.get('user_id')))
+        serializer = UserSerializer(user, context={'request': request})
+        return Response(data=serializer.data, status=status.HTTP_200_OK)
+
+    @action(detail=False, methods=['get'], url_name='user_profile', url_path='user/(?P<user_id>\d+)')
+    def user_profile(self, request, **kwargs):
+        user = get_object_or_404(User.objects.filter(id=kwargs.get('user_id')))
+        serializer = UserSerializer(user, context={'request': request})
+        return Response(data=serializer.data, status=status.HTTP_200_OK)
+
+    @action(detail=False, methods=['get'], url_name='my_profile', url_path='me')
+    def my_profile(self, request):
+        serializer = UserSerializer(request.user, context={'request': request})
         return Response(data=serializer.data, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['post'], url_name='disabled_user', url_path='user/disabled/(?P<user_id>\d+)')
@@ -40,9 +52,9 @@ class UserViewSet(viewsets.ModelViewSet):
         return Response(data={'success': 'Pomyślnie dezaktywowano użytkownika'}, status=status.HTTP_200_OK)
 
     def get_permissions(self):
-        if self.action == 'edit_user' or self.action == 'user_details' or self.action == 'create_offer':
+        if self.action == 'edit_user' or self.action == 'user_details' or self.action == 'create_offer' or self.action == 'my_profile':
             self.permission_classes = [IsAuthenticated]
-        if self.action == 'register':
+        if self.action == 'register' or self.action == 'user_profile':
             self.permission_classes = [AllowAny]
         if self.action == 'disabled_user':
             self.permission_classes = []

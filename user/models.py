@@ -8,7 +8,7 @@ from rest_framework.authtoken.models import Token
 
 
 class UserManager(BaseUserManager):
-    def create_user(self, email, nickname, first_name, last_name, phone_number, city, image=None, password=None,
+    def create_user(self, email, nickname, first_name, last_name, phone_number=None, city=None, image=None, password=None,
                     is_staff=False, is_admin=False):
         if not email:
             raise ValueError("Musisz podać swój e-mail!")
@@ -63,14 +63,14 @@ class User(AbstractBaseUser):
     active = models.BooleanField(default=True)
     admin = models.BooleanField(default=False)
     staff = models.BooleanField(default=False)
-    phone_number = models.IntegerField(null=True)
-    city = models.CharField(max_length=255, null=True)
+    phone_number = models.IntegerField(null=True, blank=True)
+    city = models.CharField(max_length=255, null=True, blank=True)
     image = models.ImageField(default='default.png', upload_to=upload_location, blank=True)
 
     def get_image(self):
         if not self.image:
-            return default_place_pics
-        return self.image
+            return settings.HOSTNAME + default_place_pics
+        return settings.HOSTNAME + self.image
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['nickname', 'first_name', 'last_name']
@@ -97,7 +97,6 @@ class User(AbstractBaseUser):
     @property
     def is_staff(self):
         return self.staff
-
 
 @receiver(post_save, sender=settings.AUTH_USER_MODEL)
 def create_auth_token(sender, instance=None, created=False, **kwargs):

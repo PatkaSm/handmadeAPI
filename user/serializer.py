@@ -1,13 +1,20 @@
 
 from rest_framework import serializers
+from rest_framework.fields import ImageField
 
 from user.models import User
 
 
 class UserSerializer(serializers.ModelSerializer):
+    image = serializers.SerializerMethodField()
+
     class Meta:
         model = User
-        fields = ['nickname', 'password', 'email', 'first_name', 'last_name', 'phone_number', 'city', 'image']
+        fields = ['id', 'nickname', 'password', 'email', 'first_name', 'last_name', 'phone_number', 'city', 'image']
+        extra_kwargs = {'password': {'write_only': True}}
+
+    def get_image(self, obj):
+        return ('http://' + self.context['request'].get_host() + obj.image.url)
 
     def create(self, validates_data):
         return User.objects.create_user(**validates_data)

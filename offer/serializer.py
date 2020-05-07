@@ -31,7 +31,6 @@ class OfferSerializer(serializers.ModelSerializer):
         fields = ['owner', 'item', 'amount', 'price', 'tag', 'comments', 'images', 'date', 'is_favourite', 'liked_by']
         read_only_fields = ['owner']
 
-
     def get_comments(self, obj):
         offer_comment = Comment.objects.filter(id=obj.id)
         serializer = CommentSerializer(offer_comment, many=True)
