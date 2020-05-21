@@ -28,7 +28,7 @@ class OfferSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Offer
-        fields = ['owner', 'item', 'amount', 'price', 'tag', 'comments', 'images', 'date', 'is_favourite', 'liked_by']
+        fields = ['id','owner', 'item', 'amount', 'price', 'tag', 'gender', 'description','comments', 'images', 'date', 'is_favourite', 'liked_by']
         read_only_fields = ['owner']
 
     def get_comments(self, obj):
