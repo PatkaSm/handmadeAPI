@@ -9,6 +9,7 @@ from rest_framework.response import Response
 
 from upload_image.models import Image
 from upload_image.serializer import ImageSerializer
+from user.models import User
 from .permissions import IsObjectOwnerOrAdmin
 from offer.models import Offer
 from offer.serializer import OfferSerializer
@@ -72,10 +73,11 @@ class OfferViewSet(viewsets.ModelViewSet):
         serializer = OfferSerializer(offers, many=True, context={'request': request})
         return JsonResponse(data=serializer.data, safe=False)
 
-    @action(detail=False, methods=['get'], url_name='user_offers', url_path='user_offers')
-    def user_offers(self, request):
-        offers = Offer.objects.filter(owner=request.user, owner__active=True)
-        serializer = OfferSerializer(offers, many=True)
+    @action(detail=False, methods=['get'], url_name='user_offers', url_path='user/(?P<user_id>\d+)/offers')
+    def user_offers(self, request, **kwargs):
+        user = get_object_or_404(User.objects.filter(id=kwargs.get('user_id')))
+        offers = Offer.objects.filter(owner=user, owner__active=True)
+        serializer = OfferSerializer(offers, many=True, context={'request': request})
         return JsonResponse(data=serializer.data, safe=False)
 
     def get_permissions(self):

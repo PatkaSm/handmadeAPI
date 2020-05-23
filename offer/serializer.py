@@ -12,6 +12,8 @@ from user.serializer import UserSerializer
 
 
 class CommentSerializer(serializers.ModelSerializer):
+    owner = UserSerializer(read_only=True, many=False)
+
     class Meta:
         model = Comment
         fields = ['owner', 'offer', 'content', 'date']
@@ -32,8 +34,8 @@ class OfferSerializer(serializers.ModelSerializer):
         read_only_fields = ['owner']
 
     def get_comments(self, obj):
-        offer_comment = Comment.objects.filter(id=obj.id)
-        serializer = CommentSerializer(offer_comment, many=True)
+        offer_comment = Comment.objects.filter(offer=obj.id)
+        serializer = CommentSerializer(offer_comment, many=True, context={'request': self.context['request']})
         return serializer.data
 
     def get_images(self, obj):
