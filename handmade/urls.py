@@ -21,6 +21,7 @@ from rest_framework import routers
 from rest_framework.authtoken import views
 
 from category.views import CategoryViewSet
+from comment.views import CommentViewSet
 from favourites.views import FavouriteViewSet
 from item.views import ItemViewSet
 from offer.views import OfferViewSet
@@ -33,6 +34,7 @@ router = routers.SimpleRouter()
 router.register(r'users', UserViewSet)
 router.register(r'items', ItemViewSet)
 router.register(r'offers', OfferViewSet)
+router.register(r'comments', CommentViewSet)
 router.register(r'tags', TagViewSet)
 router.register(r'favourites', FavouriteViewSet)
 router.register(r'upload_images', ImageViewSet)

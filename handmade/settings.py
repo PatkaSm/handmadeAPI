@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     'upload_image',
     'category',
     'chat',
+    'comment',
 
 ]
 

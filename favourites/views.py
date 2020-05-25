@@ -30,12 +30,8 @@ class FavouriteViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['get'], url_name='user_fav_offerts', url_path='my_favourites')
     def my_favourites(self, request):
         fav_offers = Favourite.objects.filter(user=request.user)
-        data=[]
-        for fav in fav_offers:
-            serializer = FavouriteSerializer(fav)
-            data.append(serializer.data)
-            print(serializer.data)
-        return Response(data=data, status=status.HTTP_200_OK)
+        serializer = FavouriteSerializer(fav_offers, many=True)
+        return Response(data=serializer.data, status=status.HTTP_200_OK)
 
     def get_permissions(self):
         if self.action == 'my_favourites' or self.action == 'add_or_remove':

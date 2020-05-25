@@ -80,6 +80,7 @@ class OfferViewSet(viewsets.ModelViewSet):
         serializer = OfferSerializer(offers, many=True, context={'request': request})
         return JsonResponse(data=serializer.data, safe=False)
 
+
     def get_permissions(self):
         if self.action == 'user_offers' or self.action == 'update_offer' or self.action == 'create_offer':
             self.permission_classes = [IsAuthenticated]

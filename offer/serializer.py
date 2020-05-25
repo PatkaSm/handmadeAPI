@@ -1,22 +1,16 @@
 from rest_framework import serializers
 
+from comment.models import Comment
+from comment.serializer import CommentSerializer
 from favourites.models import Favourite
 from item.models import Item
 from item.serializer import ItemSerializer
-from offer.models import Offer, Comment
+from offer.models import Offer
 from tag.models import Tag
 from tag.serializer import TagSerializer
 from upload_image.models import Image
 from upload_image.serializer import ImageSerializer
 from user.serializer import UserSerializer
-
-
-class CommentSerializer(serializers.ModelSerializer):
-    owner = UserSerializer(read_only=True, many=False)
-
-    class Meta:
-        model = Comment
-        fields = ['owner', 'offer', 'content', 'date']
 
 
 class OfferSerializer(serializers.ModelSerializer):
