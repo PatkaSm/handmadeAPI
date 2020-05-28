@@ -3,6 +3,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import status, viewsets, filters
 from rest_framework.decorators import action
 from rest_framework.generics import get_object_or_404
+from rest_framework.parsers import FileUploadParser
 from rest_framework.permissions import IsAuthenticated, AllowAny
 
 from rest_framework.response import Response
@@ -10,6 +11,7 @@ from rest_framework.response import Response
 from upload_image.models import Image
 from upload_image.serializer import ImageSerializer
 from user.models import User
+from user.serializer import UserSerializer
 from .permissions import IsObjectOwnerOrAdmin
 from offer.models import Offer
 from offer.serializer import OfferSerializer
@@ -25,15 +27,11 @@ class OfferViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['post'], url_name='create', url_path='create')
     def create_offer(self, request):
-        offer_serializer = OfferSerializer(data=request.data['offer'])
+        offer_serializer = OfferSerializer(data=request.data, context={'request': request})
         if not offer_serializer.is_valid():
             return Response(data=offer_serializer.errors, status=status.HTTP_406_NOT_ACCEPTABLE)
-        offer = offer_serializer.save(owner=request.user, context={'request': request})
-        image_serializer = ImageSerializer(data=request.data['image'])
-        if not image_serializer.is_valid():
-            return Response(data=image_serializer.errors, status=status.HTTP_406_NOT_ACCEPTABLE)
-        image_serializer.save(offer=offer)
-        data = [offer_serializer.data, image_serializer.data]
+        offer_serializer.save(owner=request.user)
+        data = [offer_serializer.data]
         return Response(data=data, status=status.HTTP_201_CREATED)
 
     @action(detail=False, methods=['get'], url_name='detail', url_path='offer/detail/(?P<offer_id>\d+)')
@@ -71,15 +69,14 @@ class OfferViewSet(viewsets.ModelViewSet):
         category = request.GET['category']
         offers = Offer.objects.filter(item__category__name=category, owner__active=True)
         serializer = OfferSerializer(offers, many=True, context={'request': request})
-        return JsonResponse(data=serializer.data, safe=False)
+        return Response(data=serializer.data, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['get'], url_name='user_offers', url_path='user/(?P<user_id>\d+)/offers')
     def user_offers(self, request, **kwargs):
-        user = get_object_or_404(User.objects.filter(id=kwargs.get('user_id')))
+        user = get_object_or_404(User, id=kwargs.get('user_id'))
         offers = Offer.objects.filter(owner=user, owner__active=True)
         serializer = OfferSerializer(offers, many=True, context={'request': request})
-        return JsonResponse(data=serializer.data, safe=False)
-
+        return Response(data=serializer.data, status=status.HTTP_200_OK)
 
     def get_permissions(self):
         if self.action == 'user_offers' or self.action == 'update_offer' or self.action == 'create_offer':

@@ -1,6 +1,8 @@
 from django.shortcuts import render
-from rest_framework import viewsets
-
+from rest_framework import viewsets, status
+from rest_framework.decorators import action
+from rest_framework.response import Response
+from itertools import islice
 from upload_image.models import Image
 from upload_image.serializer import ImageSerializer
 
@@ -8,4 +10,25 @@ from upload_image.serializer import ImageSerializer
 class ImageViewSet(viewsets.ModelViewSet):
     queryset = Image.objects.all()
     serializer_class = ImageSerializer
+
+    @action(methods=['post'], detail=False, url_name='create', url_path=r'create')
+    def create_img(self, request):
+        images = []
+        data = dict(request.data.lists())
+        offer_data = data['offer']
+        img_data = data['img']
+        for x in range(len(img_data)):
+            img = {
+                'offer': offer_data[x],
+                'img': img_data[x]
+                }
+            images.append(img)
+        for img in images:
+            serializer = ImageSerializer(data=img)
+            if not serializer.is_valid():
+                return Response(data=serializer.errors, status=status.HTTP_406_NOT_ACCEPTABLE)
+            serializer.save()
+
+        return Response(data={'wszystko ok'}, status=status.HTTP_201_CREATED)
+
 

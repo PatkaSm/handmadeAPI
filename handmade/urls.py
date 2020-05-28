@@ -40,6 +40,8 @@ router.register(r'favourites', FavouriteViewSet)
 router.register(r'upload_images', ImageViewSet)
 router.register(r'categories', CategoryViewSet)
 router.register(r'messages', MessageViewSet)
+router.register(r'images', ImageViewSet)
+
 
 
 urlpatterns = [

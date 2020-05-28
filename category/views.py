@@ -14,10 +14,14 @@ class CategoryViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['get'], url_name='categories', url_path='categories')
     def get_category(self, request):
         categories = Category.objects.filter(parent=None)
-        data = []
-        for root in categories:
-            data.append(CategorySerializer(root).data)
-        return JsonResponse(data=data, status=200, safe=False)
+        serializer = CategorySerializer(categories, many=True)
+        return JsonResponse(data=serializer.data, status=200, safe=False)
+
+    @action(detail=False, methods=['get'], url_name='categories', url_path='all')
+    def get_all_category(self, request):
+        allCategories = Category.objects.filter(children__isnull=True)
+        serializer = CategorySerializer(allCategories, many=True)
+        return JsonResponse(data=serializer.data, status=200, safe=False)
 
     def get_permissions(self):
         if self.action == 'delete' or self.action == 'create' or self.action == 'update':

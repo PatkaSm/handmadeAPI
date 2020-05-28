@@ -1,6 +1,5 @@
 from django.shortcuts import render
 
-# Create your views here.
 from rest_framework import viewsets, status
 from rest_framework.decorators import permission_classes, action
 from rest_framework.generics import get_object_or_404
@@ -30,8 +29,25 @@ class FavouriteViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['get'], url_name='user_fav_offerts', url_path='my_favourites')
     def my_favourites(self, request):
         fav_offers = Favourite.objects.filter(user=request.user)
-        serializer = FavouriteSerializer(fav_offers, many=True)
+        serializer = FavouriteSerializer(fav_offers, many=True, context={'request': request})
         return Response(data=serializer.data, status=status.HTTP_200_OK)
+
+    @action(detail=False, methods=['get'], url_name='get_likes', url_path='likes/(?P<offer_id>\d+)')
+    def get_likes(self, request, **kwargs):
+        offer = get_object_or_404(Offer, id=kwargs.get('offer_id'))
+        fav_offers = Favourite.objects.filter(offer=offer)
+        likes = len(fav_offers)
+        fav = Favourite.objects.filter(offer=offer, user=request.user)
+        if fav.exists():
+            is_favourite = True
+        else:
+            is_favourite = False
+
+        data = {
+            'likes': likes,
+            'is_favourite': is_favourite
+        }
+        return Response(data=data, status=status.HTTP_200_OK)
 
     def get_permissions(self):
         if self.action == 'my_favourites' or self.action == 'add_or_remove':

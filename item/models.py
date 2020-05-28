@@ -3,10 +3,10 @@ from django.db import models
 from category.models import Category
 
 COLORS={('Czerwony', 'Czerwony'), ('Czarny','Czarny'), ('Biały', 'Biały'), ('Niebieski', 'Niebieski'),
-        ('Żółty', 'Żółty'), ('Różowy', ' Różowy'), ('Zielony', 'Zielony'), ('Brązowy', 'Brązowy'),
+        ('Żółty', 'Żółty'), ('Różowy', 'Różowy'), ('Zielony', 'Zielony'), ('Brązowy', 'Brązowy'),
         ('Fioletowy', 'Fioletowy')}
 
-DAYS = {('1-3 dni', '1-3 dni'), ('do 7 dni', 'do 7 dni'), ('do 30 dni', 'do 30 dni')}
+DAYS = {('1', '1-3 dni'), ('2', 'do 7 dni'), ('3', 'do 30 dni')}
 
 
 class Item(models.Model):

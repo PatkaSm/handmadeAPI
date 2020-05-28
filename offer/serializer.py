@@ -16,7 +16,6 @@ from user.serializer import UserSerializer
 class OfferSerializer(serializers.ModelSerializer):
     item = ItemSerializer()
     tag = TagSerializer(many=True)
-    comments = serializers.SerializerMethodField()
     images = serializers.SerializerMethodField()
     is_favourite = serializers.SerializerMethodField()
     liked_by = serializers.SerializerMethodField()
@@ -24,13 +23,8 @@ class OfferSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Offer
-        fields = ['id','owner', 'item', 'amount', 'price', 'tag', 'gender', 'description','comments', 'images', 'date', 'is_favourite', 'liked_by']
+        fields = ['id','owner', 'item', 'price', 'tag', 'gender', 'description', 'images', 'date', 'is_favourite', 'liked_by']
         read_only_fields = ['owner']
-
-    def get_comments(self, obj):
-        offer_comment = Comment.objects.filter(offer=obj.id)
-        serializer = CommentSerializer(offer_comment, many=True, context={'request': self.context['request']})
-        return serializer.data
 
     def get_images(self, obj):
         offer_images = Image.objects.filter(offer=obj.id)

@@ -15,7 +15,6 @@ choices = [('Damski','Damski'), ('Męski','Męski'),('Dziecięcy','Dziecięcy'),
 class Offer(models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
     item = models.OneToOneField(Item, on_delete=models.CASCADE)
-    amount = models.IntegerField()
     price = models.DecimalField(max_digits=10, decimal_places=2)
     description = models.TextField(max_length=1000)
     tag = models.ManyToManyField(Tag)

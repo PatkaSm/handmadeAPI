@@ -21,3 +21,9 @@ class CommentViewSet(viewsets.ModelViewSet):
         offer = get_object_or_404(Offer, id=kwargs.get('offer_id'))
         comment.save(offer=offer, owner=request.user)
         return Response(data=comment.data, status=status.HTTP_201_CREATED)
+
+    @action(detail=False, methods=['get'], url_name='get_comments', url_path='offer/(?P<offer_id>\d+)')
+    def get_comments(self, request, **kwargs):
+        offer_comment = Comment.objects.filter(offer=kwargs.get('offer_id'))
+        serializer = CommentSerializer(offer_comment, many=True, context={'request': request})
+        return Response(data=serializer.data, status=status.HTTP_200_OK)
