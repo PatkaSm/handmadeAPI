@@ -17,10 +17,10 @@ class ImageViewSet(viewsets.ModelViewSet):
         data = dict(request.data.lists())
         offer_data = data['offer']
         img_data = data['img']
-        for x in range(len(img_data)):
+        for image in img_data:
             img = {
-                'offer': offer_data[x],
-                'img': img_data[x]
+                'offer': offer_data[0],
+                'img': img_data[image]
                 }
             images.append(img)
         for img in images:

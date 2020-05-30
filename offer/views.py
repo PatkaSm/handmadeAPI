@@ -8,6 +8,8 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 
 from rest_framework.response import Response
 
+from category.models import Category
+from category.serializer import CategorySerializer
 from upload_image.models import Image
 from upload_image.serializer import ImageSerializer
 from user.models import User
@@ -66,8 +68,9 @@ class OfferViewSet(viewsets.ModelViewSet):
     def offers_by_category(self, request):
         if len(request.GET) < 1:
             return Response(data={'failed': 'Nie podano kategorii'}, status=status.HTTP_406_NOT_ACCEPTABLE)
-        category = request.GET['category']
-        offers = Offer.objects.filter(item__category__name=category, owner__active=True)
+        category_name = request.GET['category']
+        categories = Category.objects.filter(name=category_name)
+        offers = Offer.objects.filter(item__category__name=category_name, owner__active=True)
         serializer = OfferSerializer(offers, many=True, context={'request': request})
         return Response(data=serializer.data, status=status.HTTP_200_OK)
 
@@ -86,6 +89,5 @@ class OfferViewSet(viewsets.ModelViewSet):
         if self.action == 'offers_by_category' or self.action == 'offer_detail':
             self.permission_classes = [AllowAny]
         return [permission() for permission in self.permission_classes]
-
 
 

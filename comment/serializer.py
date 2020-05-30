@@ -5,13 +5,10 @@ from user.serializer import UserSerializer
 
 
 class CommentSerializer(serializers.ModelSerializer):
-    owner = serializers.SerializerMethodField('get_owner')
+    owner = UserSerializer(read_only=True, many=False)
 
     class Meta:
         model = Comment
-        fields = ['owner', 'offer', 'content', 'date']
+        fields = ['id', 'owner', 'offer', 'content', 'date']
         read_only_fields = ['owner', 'offer']
 
-    def get_owner(self, instance):
-        user = UserSerializer(instance=instance.owner,  context={'request': self.context['request']})
-        return user.data

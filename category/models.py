@@ -21,3 +21,10 @@ class Category(models.Model):
             full_path.append(k.name)
             k = k.parent
         return ' -> '.join(full_path[::-1])
+
+    def check_if_have_children(self, category):
+        categories = []
+        category_children = category.children
+        for cat in category_children:
+            categories.append(cat)
+
