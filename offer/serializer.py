@@ -70,6 +70,9 @@ class OfferSerializer(serializers.ModelSerializer):
 
             item.name = item_data.get('name', item.name)
             item.category = item_data.get('category', item.category)
+            item.color = item_data.get('color', item.color)
+            item.ready_in = item_data.get('ready_in', item.ready_in)
+
             item.save()
 
         if 'tag' in validated_data.keys():
@@ -80,7 +83,8 @@ class OfferSerializer(serializers.ModelSerializer):
                 tag = Tag.objects.create(**tag_data)
                 instance.tag.add(tag)
 
-        instance.amount = validated_data.get('amount', instance.amount)
+        instance.gender = validated_data.get('gender', instance.gender)
+        instance.description = validated_data.get('description', instance.description)
         instance.price = validated_data.get('price', instance.price)
         instance.save()
 

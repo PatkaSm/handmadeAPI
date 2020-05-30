@@ -42,22 +42,17 @@ class OfferViewSet(viewsets.ModelViewSet):
         serializer = OfferSerializer(offer, context={'request': request})
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    @action(detail=False, methods=['put'], url_name='update', url_path='offer/update/(?P<offer_id>\d+)')
+    @action(detail=False, methods=['put'], url_name='update', url_path='offer/(?P<offer_id>\d+)/edit')
     def update_offer(self, request, **kwargs):
-        offer_data = request.data['offer']
+        offer_data = request.data
         offer = Offer.objects.get(id=kwargs.get('offer_id'))
         serializer = OfferSerializer(offer, data=offer_data, partial=True, context={'request': request})
         if not serializer.is_valid():
             return Response(data=serializer.errors, status=status.HTTP_406_NOT_ACCEPTABLE)
-        images = Image.objects.filter(offer=offer)
-        images_data = request.data['images']
-        img_serializer = ImageSerializer(images, data = images_data, partial=True, many=True)
-        if not img_serializer.is_valid():
-            return Response(data=img_serializer.errors, status=status.HTTP_406_NOT_ACCEPTABLE)
         serializer.update(offer, serializer.validated_data)
-        return Response(data=serializer.data, status=status.HTTP_200_OK)
+        return Response(data={'success': 'Pomyślnie zapisano zmiany!'}, status=status.HTTP_200_OK)
 
-    @action(detail=False, methods=['delete'], url_name='delete_offer', url_path='offer/delete/(?P<offer_id>\d+)')
+    @action(detail=False, methods=['delete'], url_name='delete_offer', url_path='offer/(?P<offer_id>\d+)/delete')
     def delete_offer(self, request, **kwargs):
         offer = get_object_or_404(Offer, id=kwargs.get('offer_id'))
         self.check_object_permissions(request, offer)
