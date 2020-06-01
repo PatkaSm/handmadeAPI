@@ -25,7 +25,7 @@ class OfferViewSet(viewsets.ModelViewSet):
     filter_backends = [filters.SearchFilter, filters.OrderingFilter, DjangoFilterBackend]
     search_fields = ['tag__word', 'item__name']
     ordering_fields = ['price', 'date']
-    filterset_fields = ['price', 'item__color', 'item__ready_in', 'item__shipping_abroad']
+    filterset_fields = ['price', 'item__color', 'item__ready_in']
 
     @action(detail=False, methods=['post'], url_name='create', url_path='create')
     def create_offer(self, request):
@@ -33,8 +33,7 @@ class OfferViewSet(viewsets.ModelViewSet):
         if not offer_serializer.is_valid():
             return Response(data=offer_serializer.errors, status=status.HTTP_406_NOT_ACCEPTABLE)
         offer_serializer.save(owner=request.user)
-        data = [offer_serializer.data]
-        return Response(data=data, status=status.HTTP_201_CREATED)
+        return Response(data=offer_serializer.data, status=status.HTTP_201_CREATED)
 
     @action(detail=False, methods=['get'], url_name='detail', url_path='offer/detail/(?P<offer_id>\d+)')
     def offer_detail(self, request, **kwargs):
@@ -44,9 +43,8 @@ class OfferViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['put'], url_name='update', url_path='offer/(?P<offer_id>\d+)/edit')
     def update_offer(self, request, **kwargs):
-        offer_data = request.data
         offer = Offer.objects.get(id=kwargs.get('offer_id'))
-        serializer = OfferSerializer(offer, data=offer_data, partial=True, context={'request': request})
+        serializer = OfferSerializer(offer, data=request.data, partial=True, context={'request': request})
         if not serializer.is_valid():
             return Response(data=serializer.errors, status=status.HTTP_406_NOT_ACCEPTABLE)
         serializer.update(offer, serializer.validated_data)
@@ -64,7 +62,6 @@ class OfferViewSet(viewsets.ModelViewSet):
         if len(request.GET) < 1:
             return Response(data={'failed': 'Nie podano kategorii'}, status=status.HTTP_406_NOT_ACCEPTABLE)
         category_name = request.GET['category']
-        categories = Category.objects.filter(name=category_name)
         offers = Offer.objects.filter(item__category__name=category_name, owner__active=True)
         serializer = OfferSerializer(offers, many=True, context={'request': request})
         return Response(data=serializer.data, status=status.HTTP_200_OK)

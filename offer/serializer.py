@@ -1,7 +1,4 @@
 from rest_framework import serializers
-
-from comment.models import Comment
-from comment.serializer import CommentSerializer
 from favourites.models import Favourite
 from item.models import Item
 from item.serializer import ItemSerializer
@@ -23,7 +20,8 @@ class OfferSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Offer
-        fields = ['id','owner', 'item', 'price', 'tag', 'gender', 'description', 'images', 'date', 'is_favourite', 'liked_by']
+        fields = ['id', 'owner', 'item', 'price', 'tag', 'gender', 'description', 'images', 'date', 'is_favourite',
+                  'liked_by']
         read_only_fields = ['owner']
 
     def get_images(self, obj):
