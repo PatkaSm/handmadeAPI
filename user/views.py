@@ -3,6 +3,8 @@ from rest_framework import viewsets, status
 from rest_framework.decorators import action, permission_classes
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
+
+from offer.permissions import IsAdmin
 from user.models import User
 from user.serializer import UserSerializer
 
@@ -34,6 +36,13 @@ class UserViewSet(viewsets.ModelViewSet):
         serializer = UserSerializer(user, context={'request': request})
         return Response(data=serializer.data, status=status.HTTP_200_OK)
 
+    @action(detail=False, methods=['delete'], url_name='user_delete', url_path='user/(?P<user_id>\d+)/delete')
+    def user_delete(self, request, **kwargs):
+        user = get_object_or_404(User.objects.filter(id=kwargs.get('user_id')))
+        self.check_object_permissions(request, user)
+        user.delete()
+        return Response(data={'success': 'Pomyślnie usunięto użytkownika'}, status=status.HTTP_200_OK)
+
     @action(detail=False, methods=['get'], url_name='my_profile', url_path='me')
     def my_profile(self, request):
         serializer = UserSerializer(request.user, context={'request': request})
@@ -45,11 +54,18 @@ class UserViewSet(viewsets.ModelViewSet):
         disabled_user.active = False
         return Response(data={'success': 'Pomyślnie dezaktywowano użytkownika'}, status=status.HTTP_200_OK)
 
+    @action(detail=False, methods=['get'], url_name='get_all_users', url_path='all')
+    def get_all_users(self, request):
+        users = User.objects.all().order_by('active');
+        serializer = UserSerializer(users, many=True ,context={'request': request})
+        return Response(data=serializer.data, status=status.HTTP_200_OK)
+
+
     def get_permissions(self):
-        if self.action == 'edit_user' or self.action == 'create_offer' or self.action == 'my_profile':
+        if self.action == 'edit_user' or self.action == 'my_profile':
             self.permission_classes = [IsAuthenticated]
         if self.action == 'register' or self.action == 'user_profile':
             self.permission_classes = [AllowAny]
-        if self.action == 'disabled_user':
-            self.permission_classes = []
+        if self.action == 'disabled_user' or self.action == 'user_delete' or self.action == 'edit_user':
+            self.permission_classes = [IsAdmin]
         return [permission() for permission in self.permission_classes]

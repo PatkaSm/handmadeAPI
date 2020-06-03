@@ -3,8 +3,8 @@ from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.parsers import FileUploadParser, MultiPartParser, FormParser
 from rest_framework.response import Response
-from upload_image.models import Image
-from upload_image.serializer import ImageSerializer
+from upload_image.models import Image, PostImage
+from upload_image.serializer import ImageSerializer, PostImageSerializer
 
 
 class ImageViewSet(viewsets.ModelViewSet):
@@ -36,5 +36,11 @@ class ImageViewSet(viewsets.ModelViewSet):
         images = Image.objects.filter(offer_id=kwargs.get('offer_id'))
         serializer = ImageSerializer(images, many=True)
         return Response(data=serializer.data, status=status.HTTP_201_CREATED)
+
+
+class PostImageViewSet(viewsets.ModelViewSet):
+    queryset = PostImage.objects.all()
+    serializer_class = PostImageSerializer()
+    parser_classes = (MultiPartParser, FormParser)
 
 

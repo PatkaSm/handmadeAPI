@@ -9,3 +9,9 @@ class ImageSerializer(serializers.ModelSerializer):
         model = Image
         fields = ['id', 'offer', 'img']
 
+
+class PostImageSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Image
+        fields = ['id', 'post', 'img']

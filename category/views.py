@@ -1,4 +1,3 @@
-from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
@@ -41,11 +40,14 @@ class CategoryViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['post'], url_name='create', url_path='create')
     def create_category(self, request):
+        print(request.data)
         category = CategorySerializer(data=request.data)
         self.check_object_permissions(request, category)
         if not category.is_valid():
+            print(category.errors)
             return Response(data=category.errors, status=status.HTTP_406_NOT_ACCEPTABLE)
-        category.save(owner=request.user)
+        parent = Category.objects.get(id=request.data.get('parent'))
+        category.save(parent=parent)
         return Response(data=category.data, status=status.HTTP_201_CREATED)
 
     @action(detail=False, methods=['put'], url_name='update', url_path='(?P<category_id>\d+)/edit')
