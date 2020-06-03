@@ -15,9 +15,9 @@ class PostViewSet(viewsets.GenericViewSet):
 
     @action(methods=['post'], detail=False, url_name='create', url_path=r'create')
     def create_post(self, request, **kwargs):
-        print(request.data)
-        serializer = PostSerializer(context={"host": request.get_host()}, data=request.data)
+        serializer = PostSerializer(context={"request": request}, data=request.data)
         if not serializer.is_valid():
+            print(serializer.errors)
             return Response(data=serializer.errors, status=status.HTTP_406_NOT_ACCEPTABLE)
         serializer.save(owner=request.user)
         return Response(data=serializer.data, status=status.HTTP_201_CREATED)
@@ -33,7 +33,7 @@ class PostViewSet(viewsets.GenericViewSet):
     def edit_post(self, request, **kwargs):
         post = Post.objects.get(id=kwargs.get('post_id'))
         self.check_object_permissions(request, post)
-        serializer = PostSerializer(post, request.data, context={"host": request.get_host()}, partial=True)
+        serializer = PostSerializer(post, request.data, context={"request": request}, partial=True)
         if not serializer.is_valid():
             print(serializer.errors)
             return Response(data=serializer.errors, status=status.HTTP_406_NOT_ACCEPTABLE)
@@ -43,14 +43,14 @@ class PostViewSet(viewsets.GenericViewSet):
     @action(methods=['get'], detail=False, url_name='poast_all', url_path=r'all')
     def posts_list(self, request, **kwargs):
         posts = Post.objects.all()
-        serializer = PostSerializer(posts, many=True, context={"host": request.get_host()})
+        serializer = PostSerializer(posts, many=True, context={"request": request})
         return Response(data=serializer.data, status=status.HTTP_200_OK)
 
-    @action(methods=['get'], detail=False, url_name='detail', url_path=r'post/(?P<post_id>\d+)')
+    @action(methods=['get'], detail=False, url_name='detail', url_path=r'(?P<post_id>\d+)')
     def post_detail(self, request, **kwargs):
         post = get_object_or_404(Post, id=kwargs.get('post_id'))
         self.check_object_permissions(request, post)
-        serializer = PostSerializer(post, context={"host": request.get_host()})
+        serializer = PostSerializer(post, context={"request": request})
         return Response(data=serializer.data, status=status.HTTP_200_OK)
 
     def get_permissions(self):

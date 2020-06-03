@@ -1,30 +1,27 @@
 from rest_framework import serializers
 
-from groups.serializers import GroupSerializer
-from posts.models import Post, Comment
-from users.serializers import UserSerializer
-
+from post.models import Post
 from upload_image.models import PostImage
 from upload_image.serializer import PostImageSerializer
+from user.serializer import UserSerializer
 
 
 class PostSerializer(serializers.ModelSerializer):
-    owner = serializers.SerializerMethodField('get_owner')
+    owner = UserSerializer(read_only=True, many=False)
     images = serializers.SerializerMethodField()
-
-    def get_owner(self, instance):
-        return UserSerializer(instance=instance.owner, context=self.context).data
+    host = serializers.SerializerMethodField()
 
     class Meta:
         model = Post
-        fields = ['id', 'owner', 'content', 'date_posted', 'image']
+        fields = ['id', 'title', 'owner', 'content', 'date_posted', 'images', 'host']
         read_only_fields = ['owner']
 
+    def get_host(self, obj):
+        host = 'http://' + self.context['request'].get_host()
+        return host
+
     def get_images(self, obj):
-        post_images = PostImage.objects.filter(offer=obj.id)
+        post_images = PostImage.objects.filter(post=obj.id)
         serializer = PostImageSerializer(post_images, many=True)
-        images = []
-        for offers in serializer.data:
-            images.append(('http://' + self.context['request'].get_host() + offers['img']))
-        return images
+        return serializer.data
 

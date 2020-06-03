@@ -25,8 +25,9 @@ from comment.views import CommentViewSet
 from favourites.views import FavouriteViewSet
 from item.views import ItemViewSet
 from offer.views import OfferViewSet
+from post.views import PostViewSet
 from tag.views import TagViewSet
-from upload_image.views import ImageViewSet
+from upload_image.views import ImageViewSet, PostImageViewSet
 from user.views import UserViewSet
 from chat.views import MessageViewSet
 
@@ -41,7 +42,8 @@ router.register(r'upload_images', ImageViewSet)
 router.register(r'categories', CategoryViewSet)
 router.register(r'messages', MessageViewSet)
 router.register(r'images', ImageViewSet)
-
+router.register(r'postImages', PostImageViewSet)
+router.register(r'posts', PostViewSet)
 
 
 urlpatterns = [

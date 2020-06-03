@@ -1,5 +1,5 @@
 from django.db import models
-
+from itertools import chain
 
 def upload_location(instance, filename):
     return "item ID %s/%s" % (instance.id, filename)
@@ -28,3 +28,7 @@ class Category(models.Model):
         for cat in category_children:
             categories.append(cat)
 
+    def subcategories(self):
+        """For a given category, returns list of all descending categories"""
+        subcategories = [child.subcategories() for child in self.children.all()]
+        return [self, *chain(*subcategories)]

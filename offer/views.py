@@ -62,7 +62,10 @@ class OfferViewSet(viewsets.ModelViewSet):
         if len(request.GET) < 1:
             return Response(data={'failed': 'Nie podano kategorii'}, status=status.HTTP_406_NOT_ACCEPTABLE)
         category_name = request.GET['category']
-        offers = Offer.objects.filter(item__category__name=category_name, owner__active=True)
+        category = Category.objects.get(name=category_name)
+        subcategoriesList = category.subcategories()
+        offers = Offer.objects.filter(item__category__in=subcategoriesList, owner__active=True)
+        print(offers)
         serializer = OfferSerializer(offers, many=True, context={'request': request})
         return Response(data=serializer.data, status=status.HTTP_200_OK)
 
