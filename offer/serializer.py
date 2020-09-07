@@ -28,8 +28,8 @@ class OfferSerializer(serializers.ModelSerializer):
         offer_images = Image.objects.filter(offer=obj.id)
         serializer = ImageSerializer(offer_images, many=True)
         images = []
-        for offers in serializer.data:
-            images.append(('http://' + self.context['request'].get_host() + offers['img']))
+        for img in serializer.data:
+            images.append(('http://' + self.context['request'].get_host() + img['img']))
         return images
 
     def get_is_favourite(self, obj):
@@ -54,11 +54,18 @@ class OfferSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         item_data = validated_data.pop('item')
         tags_data = validated_data.pop('tag')
+        images_data = validated_data.pop('images')
         item = Item.objects.create(**item_data)
         offer = Offer.objects.create(item=item, **validated_data)
         for tag_data in tags_data:
-            tag = Tag.objects.create(**tag_data)
-            offer.tag.add(tag)
+            used_tag = Tag.objects.filter(word=tag_data['word'])
+            if used_tag.exists():
+                offer.tag.add(used_tag[0])
+            else:
+                tag = Tag.objects.create(**tag_data)
+                offer.tag.add(tag)
+        for image_data in images_data:
+            Image.objects.create(**image_data, offer=offer)
         return offer
 
     def update(self, instance, validated_data):
@@ -70,7 +77,6 @@ class OfferSerializer(serializers.ModelSerializer):
             item.category = item_data.get('category', item.category)
             item.color = item_data.get('color', item.color)
             item.ready_in = item_data.get('ready_in', item.ready_in)
-
             item.save()
 
         if 'tag' in validated_data.keys():
@@ -87,7 +93,3 @@ class OfferSerializer(serializers.ModelSerializer):
         instance.save()
 
         return instance
-
-
-
-

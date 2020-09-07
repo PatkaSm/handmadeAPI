@@ -1,10 +1,10 @@
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets, status
-from rest_framework.decorators import action, permission_classes
+from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 
-from offer.permissions import IsAdmin
+from offer.permissions import IsAdmin, IsObjectOwnerOrAdmin
 from user.models import User
 from user.serializer import UserSerializer
 
@@ -12,36 +12,6 @@ from user.serializer import UserSerializer
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
-
-    @action(detail=False, methods=['post'], url_name='register', url_path='register')
-    def register(self, request):
-        serializer = UserSerializer(data=request.data)
-        if not serializer.is_valid():
-            return Response(data=serializer.errors, status=status.HTTP_406_NOT_ACCEPTABLE)
-        serializer.save()
-        return Response(data=serializer.data, status=status.HTTP_201_CREATED)
-
-    @action(detail=False, methods=['put'], url_name='update', url_path='user/edit/(?P<user_id>\d+)')
-    def edit_user(self, request, **kwargs):
-        user = get_object_or_404(User.objects.filter(id=kwargs.get('user_id')))
-        serializer = UserSerializer(user, data=request.data, partial=True)
-        if not serializer.is_valid():
-            return Response(data=serializer.data, status=status.HTTP_406_NOT_ACCEPTABLE)
-        serializer.update(instance=request.user, validated_data=serializer.validated_data)
-        return Response(data=serializer.data, status=status.HTTP_200_OK)
-
-    @action(detail=False, methods=['get'], url_name='user_details', url_path='user/(?P<user_id>\d+)')
-    def user_details(self, request, **kwargs):
-        user = get_object_or_404(User.objects.filter(id=kwargs.get('user_id')))
-        serializer = UserSerializer(user, context={'request': request})
-        return Response(data=serializer.data, status=status.HTTP_200_OK)
-
-    @action(detail=False, methods=['delete'], url_name='user_delete', url_path='user/(?P<user_id>\d+)/delete')
-    def user_delete(self, request, **kwargs):
-        user = get_object_or_404(User.objects.filter(id=kwargs.get('user_id')))
-        self.check_object_permissions(request, user)
-        user.delete()
-        return Response(data={'success': 'Pomyślnie usunięto użytkownika'}, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['get'], url_name='my_profile', url_path='me')
     def my_profile(self, request):
@@ -54,18 +24,19 @@ class UserViewSet(viewsets.ModelViewSet):
         disabled_user.active = False
         return Response(data={'success': 'Pomyślnie dezaktywowano użytkownika'}, status=status.HTTP_200_OK)
 
-    @action(detail=False, methods=['get'], url_name='get_all_users', url_path='all')
-    def get_all_users(self, request):
-        users = User.objects.all().order_by('active');
-        serializer = UserSerializer(users, many=True ,context={'request': request})
+    @action(detail=False, methods=['get'], url_name='search', url_path='search')
+    def search(self, request):
+        word = request.GET.get('search')
+        results = User.objects.filter(nickname__contains=word).union(User.objects.filter(email__contains=word))
+        serializer = UserSerializer(results, many=True, context={'request': request})
         return Response(data=serializer.data, status=status.HTTP_200_OK)
 
-
     def get_permissions(self):
-        if self.action == 'edit_user' or self.action == 'my_profile':
-            self.permission_classes = [IsAuthenticated]
-        if self.action == 'register' or self.action == 'user_profile':
+        if self.action == 'create' or self.action == 'retrieve' or self.action == 'search':
             self.permission_classes = [AllowAny]
-        if self.action == 'disabled_user' or self.action == 'user_delete' or self.action == 'edit_user':
+        if self.action == 'partial_update' or self.action == 'my_profile':
+            self.permission_classes = [IsAuthenticated, IsObjectOwnerOrAdmin]
+        if self.action == 'disabled_user' or self.action == 'destroy':
             self.permission_classes = [IsAdmin]
+
         return [permission() for permission in self.permission_classes]

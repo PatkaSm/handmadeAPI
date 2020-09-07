@@ -40,7 +40,7 @@ class ImageViewSet(viewsets.ModelViewSet):
 
 class PostImageViewSet(viewsets.ModelViewSet):
     queryset = PostImage.objects.all()
-    serializer_class = PostImageSerializer()
+    serializer_class = PostImageSerializer
     parser_classes = (MultiPartParser, FormParser)
 
     @action(methods=['post'], detail=False, url_name='create', url_path=r'create')

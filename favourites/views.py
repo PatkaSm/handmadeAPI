@@ -1,6 +1,4 @@
-from django.shortcuts import render
-
-from rest_framework import viewsets, status
+from rest_framework import viewsets, status, mixins
 from rest_framework.decorators import permission_classes, action
 from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
@@ -11,13 +9,14 @@ from favourites.serializer import FavouriteSerializer
 from offer.models import Offer
 
 
-class FavouriteViewSet(viewsets.ModelViewSet):
+class FavouriteViewSet(mixins.ListModelMixin,
+                       mixins.RetrieveModelMixin,
+                       viewsets.GenericViewSet):
     queryset = Favourite.objects.all()
     serializer_class = FavouriteSerializer
 
-    @action(detail=False, methods=['post'], url_name='add_or_remove', url_path='add/(?P<offer_id>\d+)')
-    def add_or_remove(self, request, **kwargs):
-        offer = get_object_or_404(Offer, id=kwargs.get('offer_id'))
+    def create(self, request, **kwargs):
+        offer = get_object_or_404(Offer, id=kwargs.get('pk'))
         try:
             fav_offer = Favourite.objects.get(offer=offer, user=request.user)
         except Favourite.DoesNotExist:
@@ -50,6 +49,7 @@ class FavouriteViewSet(viewsets.ModelViewSet):
         return Response(data=data, status=status.HTTP_200_OK)
 
     def get_permissions(self):
-        if self.action == 'my_favourites' or self.action == 'add_or_remove':
+        if self.action == 'my_favourites' or self.action == 'create' or self.action == 'add_or_remove' \
+                or self.action == 'retrieve' or self.action == 'list':
             self.permission_classes = [IsAuthenticated]
         return [permission() for permission in self.permission_classes]
