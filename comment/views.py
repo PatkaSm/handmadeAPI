@@ -14,15 +14,6 @@ class CommentViewSet(viewsets.ModelViewSet):
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
 
-    @action(detail=False, methods=['post'], url_name='create', url_path='offer/(?P<offer_id>\d+)/create')
-    def create_comment(self, request, **kwargs):
-        comment = CommentSerializer(context={'request': request}, data=request.data)
-        if not comment.is_valid():
-            return Response(data=comment.errors, status=status.HTTP_406_NOT_ACCEPTABLE)
-        offer = get_object_or_404(Offer, id=kwargs.get('offer_id'))
-        comment.save(offer=offer, owner=request.user)
-        return Response(data={'message': 'Pomyślnie dodano komentarz'}, status=status.HTTP_201_CREATED)
-
     @action(detail=False, methods=['get'], url_name='get_comments', url_path='offer/(?P<offer_id>\d+)/comments')
     def get_comments(self, request, **kwargs):
         offer_comment = Comment.objects.filter(offer=kwargs.get('offer_id'))

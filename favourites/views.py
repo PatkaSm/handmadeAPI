@@ -15,8 +15,9 @@ class FavouriteViewSet(mixins.ListModelMixin,
     queryset = Favourite.objects.all()
     serializer_class = FavouriteSerializer
 
-    def create(self, request, **kwargs):
-        offer = get_object_or_404(Offer, id=kwargs.get('pk'))
+    @action(detail=False, methods=['post'], url_name='like_toggle', url_path='like_toggle/(?P<offer_id>\d+)')
+    def like_toggle(self, request, **kwargs):
+        offer = get_object_or_404(Offer, id=kwargs.get('offer_id'))
         try:
             fav_offer = Favourite.objects.get(offer=offer, user=request.user)
         except Favourite.DoesNotExist:
@@ -49,7 +50,7 @@ class FavouriteViewSet(mixins.ListModelMixin,
         return Response(data=data, status=status.HTTP_200_OK)
 
     def get_permissions(self):
-        if self.action == 'my_favourites' or self.action == 'create' or self.action == 'add_or_remove' \
+        if self.action == 'my_favourites' or self.action == "create" or self.action == 'like_toggle' \
                 or self.action == 'retrieve' or self.action == 'list':
             self.permission_classes = [IsAuthenticated]
         return [permission() for permission in self.permission_classes]

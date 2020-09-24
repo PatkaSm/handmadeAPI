@@ -8,6 +8,13 @@ class IsAdmin(permissions.BasePermission):
         return request.user.is_admin
 
 
+class IsAdminOrProfileOwner(permissions.BasePermission):
+    message = 'Dozwolone tylko dla administratora.'
+
+    def has_permission(self, request, view):
+        return request.user.is_staff or request.user
+
+
 class IsObjectOwnerOrAdmin(permissions.BasePermission):
     message = "Dozwolone tylko dla autora."
 

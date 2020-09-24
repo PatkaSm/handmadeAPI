@@ -51,7 +51,8 @@ INSTALLED_APPS = [
     'category',
     'chat',
     'comment',
-    'post'
+    'post',
+    'channels'
 
 ]
 
@@ -99,6 +100,8 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'handmade.wsgi.application'
 
+# Channels
+ASGI_APPLICATION = 'handmade.routing.application'
 
 # Database
 # https://docs.djangoproject.com/en/2.2/ref/settings/#databases
