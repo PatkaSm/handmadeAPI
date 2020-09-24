@@ -54,7 +54,6 @@ class OfferSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         item_data = validated_data.pop('item')
         tags_data = validated_data.pop('tag')
-        images_data = validated_data.pop('images')
         item = Item.objects.create(**item_data)
         offer = Offer.objects.create(item=item, **validated_data)
         for tag_data in tags_data:
@@ -64,8 +63,6 @@ class OfferSerializer(serializers.ModelSerializer):
             else:
                 tag = Tag.objects.create(**tag_data)
                 offer.tag.add(tag)
-        for image_data in images_data:
-            Image.objects.create(**image_data, offer=offer)
         return offer
 
     def update(self, instance, validated_data):

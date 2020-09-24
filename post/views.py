@@ -9,28 +9,12 @@ from post.models import Post
 from post.serializers import PostSerializer
 
 
-class PostViewSet(mixins.DestroyModelMixin,
-                  viewsets.GenericViewSet):
+class PostViewSet(viewsets.ModelViewSet):
     queryset = Post.objects.all()
     serializer_class = PostSerializer
 
-    def create(self, request, **kwargs):
-        serializer = PostSerializer(context={"request": request}, data=request.data)
-        if not serializer.is_valid():
-            return Response(data=serializer.errors, status=status.HTTP_406_NOT_ACCEPTABLE)
-        serializer.save(owner=request.user)
-        return Response(data=serializer.data, status=status.HTTP_201_CREATED)
-
-    def list(self, request, **kwargs):
-        posts = Post.objects.all()
-        serializer = PostSerializer(posts, many=True, context={"request": request})
-        return Response(data=serializer.data, status=status.HTTP_200_OK)
-
-    def retrieve(self, request, **kwargs):
-        post = get_object_or_404(Post, id=kwargs.get('post_id'))
-        self.check_object_permissions(request, post)
-        serializer = PostSerializer(post, context={"request": request})
-        return Response(data=serializer.data, status=status.HTTP_200_OK)
+    def perform_create(self, serializer):
+        serializer.save(owner=self.request.user)
 
     def get_permissions(self):
         if self.action == 'list' or self.action == 'retrieve':
