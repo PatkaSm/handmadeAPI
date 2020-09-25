@@ -1,13 +1,28 @@
 from rest_framework import serializers
 
-from chat.models import Message
+from chat.models import Message, Thread
+from user.serializer import UserSerializer
+
+
+class ThreadSerializer(serializers.ModelSerializer):
+    user1 = UserSerializer(many=False, read_only=True)
+    user2 = UserSerializer(many=False, read_only=True)
+    last_message = serializers.SerializerMethodField('get_message', read_only=True)
+
+    def get_message(self, instance):
+        last_message = Message.objects.filter(thread=instance).order_by('date_send')[0]
+        if not last_message:
+            return None
+        return MessageSerializer(last_message).data
+
+    class Meta:
+        model = Thread
+        fields = ['id', 'user1', 'user2', 'last_message']
 
 
 class MessageSerializer(serializers.ModelSerializer):
-    sender = serializers.SlugRelatedField(read_only=True, slug_field='nickname')
-    receiver = serializers.SlugRelatedField(read_only=True, slug_field='nickname')
+    sender = UserSerializer(read_only=True, many=False)
 
     class Meta:
         model = Message
-        fields = ['sender', 'receiver', 'message', 'timestamp']
-        read_only_fields = ['sender', 'receiver']
+        fields = ['id', 'thread', 'content', 'date_send', 'sender']

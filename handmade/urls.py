@@ -21,6 +21,7 @@ from rest_framework import routers
 from rest_framework.authtoken import views
 
 from category.views import CategoryViewSet
+from chat.views import ChatViewSet
 from comment.views import CommentViewSet
 from favourites.views import FavouriteViewSet
 from item.views import ItemViewSet
@@ -29,7 +30,6 @@ from post.views import PostViewSet
 from tag.views import TagViewSet
 from upload_image.views import ImageViewSet, PostImageViewSet
 from user.views import UserViewSet
-from chat.views import MessageViewSet
 
 router = routers.SimpleRouter()
 router.register(r'users', UserViewSet)
@@ -40,10 +40,10 @@ router.register(r'tags', TagViewSet)
 router.register(r'favourites', FavouriteViewSet)
 router.register(r'upload_images', ImageViewSet)
 router.register(r'categories', CategoryViewSet)
-router.register(r'messages', MessageViewSet)
 router.register(r'images', ImageViewSet)
 router.register(r'postImages', PostImageViewSet)
 router.register(r'posts', PostViewSet)
+router.register(r'chat', ChatViewSet)
 
 
 urlpatterns = [
