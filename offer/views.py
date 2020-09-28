@@ -59,6 +59,6 @@ class OfferViewSet(viewsets.ModelViewSet):
             self.permission_classes = [IsAuthenticated]
         if self.action == 'destroy' or self.action == 'update' or self.action == 'partial_update':
             self.permission_classes = [IsAuthenticated, IsObjectOwnerOrAdmin]
-        if self.action == 'offers_by_category' or self.action == 'Retrieve' or self.action == 'list':
+        if self.action == 'offers_by_category' or self.action == 'retrieve' or self.action == 'list':
             self.permission_classes = [AllowAny]
         return [permission() for permission in self.permission_classes]

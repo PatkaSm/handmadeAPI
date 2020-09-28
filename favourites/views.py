@@ -15,7 +15,7 @@ class FavouriteViewSet(mixins.ListModelMixin,
     queryset = Favourite.objects.all()
     serializer_class = FavouriteSerializer
 
-    @action(detail=False, methods=['post'], url_name='like_toggle', url_path='like_toggle/(?P<offer_id>\d+)')
+    @action(detail=False, methods=['post'], url_name='like_toggle', url_path='(?P<offer_id>\d+)/like_toggle')
     def like_toggle(self, request, **kwargs):
         offer = get_object_or_404(Offer, id=kwargs.get('offer_id'))
         try:

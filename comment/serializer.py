@@ -12,7 +12,7 @@ class CommentSerializer(serializers.ModelSerializer):
         read_only_fields = ['owner']
 
     def create(self, validated_data):
-        comment_data = validated_data.pop('content')
-        offer_id = validated_data.pop('offer')
-        comment = Comment.objects.create(content=comment_data, offer=offer_id, owner=self.context['request'].user)
+        print(validated_data)
+        comment = Comment.objects.create(content=validated_data['content'], offer=validated_data['offer'],
+                                         owner=self.context['request'].user)
         return comment

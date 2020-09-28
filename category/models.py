@@ -1,6 +1,7 @@
 from django.db import models
 from itertools import chain
 
+
 def upload_location(instance, filename):
     return "item ID %s/%s" % (instance.id, filename)
 

@@ -1,9 +1,9 @@
-from django.http import JsonResponse
 from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
-from .models import Item, COLORS
+from offer.models import Offer
+from .models import Item
 from .serializer import ItemSerializer
 
 
@@ -12,8 +12,10 @@ class ItemViewSet(viewsets.ModelViewSet):
     serializer_class = ItemSerializer
 
     @action(detail=False, methods=['get'], url_name='colors', url_path='colors')
-    def get_colors(self, request):
-        colors = []
-        for color in COLORS:
-            colors.append(color[0])
-        return Response(data=colors, status=200)
+    def get_item_properties(self, request):
+        data = {
+            'colors': Item.Colors.choices,
+            'ready_in': Item.Days.choices,
+            'gender': Offer.GenderType.choices
+        }
+        return Response(data=data, status=200)

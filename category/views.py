@@ -1,6 +1,6 @@
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets, status, mixins
-from rest_framework.decorators import action, api_view
+from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
@@ -58,7 +58,6 @@ class CategoryViewSet(mixins.DestroyModelMixin,
             self.permission_classes = [AllowAny]
         if self.action == 'categories_to_add_offer':
             self.permission_classes = [IsAuthenticated, IsObjectOwnerOrAdmin]
-        if self.action == 'update_category' or self.action == 'retrieve' \
-                or self.action == 'list' or self.action == 'create_category':
+        if self.action == 'update_category' or self.action == 'retrieve' or self.action == 'create_category':
             self.permission_classes = [IsAdmin]
         return [permission() for permission in self.permission_classes]

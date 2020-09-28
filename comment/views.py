@@ -14,7 +14,7 @@ class CommentViewSet(viewsets.ModelViewSet):
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
 
-    @action(detail=False, methods=['get'], url_name='get_comments', url_path='offer/(?P<offer_id>\d+)/comments')
+    @action(detail=False, methods=['get'], url_name='get_comments', url_path='offer/(?P<offer_id>\d+)')
     def get_comments(self, request, **kwargs):
         offer_comment = Comment.objects.filter(offer=kwargs.get('offer_id'))
         serializer = CommentSerializer(offer_comment, many=True, context={'request': request})

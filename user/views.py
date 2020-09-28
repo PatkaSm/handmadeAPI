@@ -1,7 +1,7 @@
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from offer.permissions import IsAdmin, IsAdminOrProfileOwner
 from user.models import User
@@ -34,7 +34,7 @@ class UserViewSet(viewsets.ModelViewSet):
         if self.action == 'create' or self.action == 'retrieve' or self.action == 'search':
             self.permission_classes = [AllowAny]
         if self.action == 'partial_update' or self.action == 'my_profile' or self.action == 'update':
-            self.permission_classes = [IsAdminOrProfileOwner]
+            self.permission_classes = [IsAuthenticated, IsAdminOrProfileOwner]
         if self.action == 'disabled_user' or self.action == 'destroy':
             self.permission_classes = [IsAdmin]
 
