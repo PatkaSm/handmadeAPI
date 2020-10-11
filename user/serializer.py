@@ -15,6 +15,7 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
         fields = ['id', 'nickname', 'password', 'email', 'first_name', 'last_name', 'phone_number', 'city', 'image',
                   'admin', 'active', 'offers', 'posts']
+        read_only_fields = ['admin']
         extra_kwargs = {'password': {'write_only': True}}
 
     def get_offers(self, obj):

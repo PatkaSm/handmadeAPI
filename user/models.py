@@ -9,7 +9,7 @@ from rest_framework.authtoken.models import Token
 
 class UserManager(BaseUserManager):
     def create_user(self, email, nickname, first_name, last_name, phone_number=None, city=None, image=None, password=None,
-                    is_staff=False, is_admin=False):
+                    is_staff=False, is_admin=False, active=True):
         if not email:
             raise ValueError("Musisz podać swój e-mail!")
         if not nickname:
@@ -23,6 +23,7 @@ class UserManager(BaseUserManager):
         user_obj.last_name = last_name
         user_obj.phone_number = phone_number
         user_obj.city = city
+        user_obj.active = active
         if image is not None:
             user_obj.image = image
         user_obj.staff = is_staff

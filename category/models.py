@@ -7,7 +7,7 @@ def upload_location(instance, filename):
 
 
 class Category(models.Model):
-    name = models.CharField(max_length=255)
+    name = models.CharField(max_length=255, null=False, blank=False )
     parent = models.ForeignKey('self', blank=True, null=True, related_name='children', on_delete=models.CASCADE)
     img = models.ImageField(null=True, blank=True, max_length=None, upload_to=upload_location)
 

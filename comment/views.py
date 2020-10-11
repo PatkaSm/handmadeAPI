@@ -1,13 +1,11 @@
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
-from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
 from comment.models import Comment
 from comment.serializer import CommentSerializer
-from offer.models import Offer
-from offer.permissions import IsObjectOwnerOrAdmin
+from core.permissions import IsObjectOwnerOrAdmin
 
 
 class CommentViewSet(viewsets.ModelViewSet):

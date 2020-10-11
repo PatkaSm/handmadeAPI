@@ -6,7 +6,7 @@ from rest_framework.response import Response
 
 from category.models import Category
 from category.serializer import CategorySerializer
-from offer.permissions import IsAdmin, IsObjectOwnerOrAdmin
+from core.permissions import IsAdmin, IsObjectOwnerOrAdmin
 
 
 class CategoryViewSet(mixins.DestroyModelMixin,
@@ -17,24 +17,23 @@ class CategoryViewSet(mixins.DestroyModelMixin,
     serializer_class = CategorySerializer
 
     @action(detail=False, methods=['get'], url_name='nav_categories', url_path='nav_categories')
-    def get_category(self, request):
+    def nav_categories(self, request):
         categories = Category.objects.filter(parent__name="Wszystko").union(
             Category.objects.filter(name="Wszystko")).order_by("name")
         serializer = CategorySerializer(categories, many=True)
         return Response(data=serializer.data, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['get'], url_name='categories_to_add_offer', url_path='no_core')
-    def get_all_category(self, request):
+    def categories_to_add_offer(self, request):
         allCategories = Category.objects.filter(children__isnull=True)
         serializer = CategorySerializer(allCategories, many=True)
         return Response(data=serializer.data, status=status.HTTP_200_OK)
 
-    @action(detail=False, methods=['put'], url_name='create_category', url_path='create_category')
+    @action(detail=False, methods=['post'], url_name='create_category', url_path='create_category')
     def create_category(self, request):
         category = CategorySerializer(data=request.data)
         self.check_object_permissions(request, category)
         if not category.is_valid():
-            print(category.errors)
             return Response(data=category.errors, status=status.HTTP_406_NOT_ACCEPTABLE)
         parent = Category.objects.get(id=request.data.get('parent'))
         category.save(parent=parent)
@@ -51,13 +50,18 @@ class CategoryViewSet(mixins.DestroyModelMixin,
         if not serializer.is_valid():
             return Response(data=serializer.errors, status=status.HTTP_406_NOT_ACCEPTABLE)
         serializer.update(category, serializer.validated_data)
-        return Response(data={'success': 'Pomyślnie edytowano kategorię!'}, status=status.HTTP_200_OK)
+        data = {
+            'message': 'Pomyślnie edytowano kategorię!',
+            'category': serializer.data
+        }
+        return Response(data=data, status=status.HTTP_200_OK)
 
     def get_permissions(self):
         if self.action == 'nav_categories':
             self.permission_classes = [AllowAny]
         if self.action == 'categories_to_add_offer':
-            self.permission_classes = [IsAuthenticated, IsObjectOwnerOrAdmin]
-        if self.action == 'update_category' or self.action == 'retrieve' or self.action == 'create_category':
+            self.permission_classes = [IsAuthenticated]
+        if self.action == 'update_category' or self.action == 'retrieve' or self.action == 'create_category' \
+               or self.action == 'destroy' :
             self.permission_classes = [IsAdmin]
         return [permission() for permission in self.permission_classes]
