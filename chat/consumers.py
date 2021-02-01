@@ -42,6 +42,8 @@ class ChatConsumer(WebsocketConsumer):
         for header in self.scope.get('headers'):
             headers[header[0].decode('UTF-8')] = header[1].decode('UTF-8')
         serializer = MessageSerializer(message)
+        print(serializer.data)
+        serializer.data['sender']['image'] = 'http://' + headers['host'] + serializer.data['sender']['image']
         async_to_sync(self.channel_layer.group_send)(
             self.room_id,
             {

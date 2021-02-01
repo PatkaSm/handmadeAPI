@@ -28,7 +28,7 @@ from item.views import ItemViewSet
 from offer.views import OfferViewSet
 from post.views import PostViewSet
 from tag.views import TagViewSet
-from upload_image.views import ImageViewSet, PostImageViewSet
+from upload_image.views import ImageViewSet
 from user.views import UserViewSet
 
 router = routers.SimpleRouter()
@@ -41,7 +41,6 @@ router.register(r'favourites', FavouriteViewSet)
 router.register(r'upload_images', ImageViewSet)
 router.register(r'categories', CategoryViewSet)
 router.register(r'images', ImageViewSet)
-router.register(r'postImages', PostImageViewSet)
 router.register(r'posts', PostViewSet)
 router.register(r'chat', ChatViewSet)
 

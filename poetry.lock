@@ -443,7 +443,7 @@ test = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
 testing = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
 
 [metadata]
-content-hash = "a980b26e59014d40c2798de4b5935daa7dfa263a1d687c4edf977dc0c6877221"
+content-hash = "17f48a4f3f699f4445b85778b5d61495ad5fa802684014679df8a4e1c66ee1a7"
 python-versions = "3.6.9"
 
 [metadata.files]

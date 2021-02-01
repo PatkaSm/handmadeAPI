@@ -62,6 +62,6 @@ class CategoryViewSet(mixins.DestroyModelMixin,
         if self.action == 'categories_to_add_offer':
             self.permission_classes = [IsAuthenticated]
         if self.action == 'update_category' or self.action == 'retrieve' or self.action == 'create_category' \
-               or self.action == 'destroy' :
+               or self.action == 'destroy':
             self.permission_classes = [IsAdmin]
         return [permission() for permission in self.permission_classes]

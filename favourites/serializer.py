@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
 from favourites.models import Favourite
-from offer.serializer import OfferSerializer
+from offer.serializer import OfferReadSerializer
 
 
 class FavouriteSerializer(serializers.ModelSerializer):
@@ -12,6 +12,6 @@ class FavouriteSerializer(serializers.ModelSerializer):
         fields = ['offer', 'user']
 
     def get_offer(self, obj):
-        return OfferSerializer(obj.offer, context=self.context).data
+        return OfferReadSerializer(obj.offer, context=self.context).data
 
 

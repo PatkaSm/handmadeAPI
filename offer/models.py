@@ -2,6 +2,7 @@ from django.db import models
 
 from item.models import Item
 from tag.models import Tag
+from upload_image.models import Image
 from user.models import User
 
 
@@ -26,6 +27,7 @@ class Offer(models.Model):
     description = models.TextField(max_length=1000)
     tag = models.ManyToManyField(Tag)
     gender = models.CharField(max_length=255, choices=GenderType.choices, default='Wszyscy')
+    gallery = models.ManyToManyField(Image, null=True, blank=True, related_name="gallery")
     date = models.DateField(auto_now=True)
     shipping_abroad = models.CharField(choices=ShippingAbroad.choices, max_length=5)
 
