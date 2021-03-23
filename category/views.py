@@ -6,7 +6,7 @@ from rest_framework.response import Response
 
 from category.models import Category
 from category.serializer import CategorySerializer
-from core.permissions import IsAdmin, IsObjectOwnerOrAdmin
+from core.permissions import IsAdmin
 
 
 class CategoryViewSet(mixins.DestroyModelMixin,
@@ -25,8 +25,8 @@ class CategoryViewSet(mixins.DestroyModelMixin,
 
     @action(detail=False, methods=['get'], url_name='categories_to_add_offer', url_path='no_core')
     def categories_to_add_offer(self, request):
-        allCategories = Category.objects.filter(children__isnull=True)
-        serializer = CategorySerializer(allCategories, many=True)
+        all_categories = Category.objects.filter(children__isnull=True)
+        serializer = CategorySerializer(all_categories, many=True)
         return Response(data=serializer.data, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['post'], url_name='create_category', url_path='create_category')

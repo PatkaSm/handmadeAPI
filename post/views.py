@@ -1,14 +1,24 @@
 from rest_framework import viewsets
+from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.permissions import IsAuthenticated, AllowAny
 
 from core.permissions import IsObjectOwnerOrAdmin
+from core.views import MultiSerializerMixin
 from post.models import Post
-from post.serializers import PostSerializer
+from post.serializers import PostSerializer, PostReadSerializer
 
 
-class PostViewSet(viewsets.ModelViewSet):
+class PostViewSet(MultiSerializerMixin, viewsets.ModelViewSet):
     queryset = Post.objects.all()
-    serializer_class = PostSerializer
+    paginator = LimitOffsetPagination()
+
+    serializers = {
+        'create': PostSerializer,
+        'update': PostSerializer,
+        'partial_update': PostSerializer,
+        'list': PostReadSerializer,
+        'retrieve': PostReadSerializer,
+    }
 
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)

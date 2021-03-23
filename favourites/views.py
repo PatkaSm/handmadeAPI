@@ -1,6 +1,7 @@
 from rest_framework import viewsets, status, mixins
 from rest_framework.decorators import permission_classes, action
 from rest_framework.generics import get_object_or_404
+from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
@@ -30,7 +31,9 @@ class FavouriteViewSet(mixins.ListModelMixin,
     def my_favourites(self, request):
         fav_offers = Favourite.objects.filter(user=request.user)
         serializer = FavouriteSerializer(fav_offers, many=True, context={'request': request})
-        return Response(data=serializer.data, status=status.HTTP_200_OK)
+        paginator = LimitOffsetPagination()
+        data = paginator.paginate_queryset(serializer.data, request)
+        return paginator.get_paginated_response(data=data)
 
     @action(detail=False, methods=['get'], url_name='get_likes', url_path='likes/(?P<offer_id>\d+)')
     def get_likes(self, request, **kwargs):

@@ -79,7 +79,6 @@ class OfferReadSerializer(serializers.ModelSerializer):
                   'liked_by']
         read_only_fields = ['owner']
 
-
     def get_is_favourite(self, obj):
         if self.context['request'].user.is_authenticated:
             is_favourite = Favourite.objects.filter(offer=obj.id, user=self.context['request'].user)

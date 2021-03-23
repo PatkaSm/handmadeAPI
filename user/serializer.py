@@ -13,7 +13,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['id', 'nickname', 'password', 'email', 'first_name', 'last_name', 'phone_number', 'city', 'image',
+        fields = ['id', 'nickname', 'email', 'first_name', 'last_name', 'phone_number', 'city', 'image',
                   'admin', 'active', 'offers', 'posts']
         read_only_fields = ['admin']
         extra_kwargs = {'password': {'write_only': True}}
@@ -38,8 +38,14 @@ class UserSerializer(serializers.ModelSerializer):
         instance.city = validated_data.get('city', instance.city)
         instance.active = validated_data.get('active', instance.active)
         instance.image = validated_data.get('image', instance.image)
-        if validated_data.get('password'):
-            instance.set_password(raw_password=validated_data.get('password'))
+        # if validated_data.get('password'):
+        #     instance.set_password(raw_password=validated_data.get('password'))
         instance.save()
         return instance
 
+
+class LoggedUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['id', 'nickname', 'email', 'first_name', 'last_name', 'admin', 'active']
+        read_only_fields = ['admin']
