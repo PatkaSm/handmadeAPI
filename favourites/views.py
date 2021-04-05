@@ -14,6 +14,11 @@ class FavouriteViewSet(mixins.ListModelMixin,
                        mixins.RetrieveModelMixin,
                        viewsets.GenericViewSet):
     queryset = Favourite.objects.all()
+    filterset_fields = {'offer__price': ['gte', 'lte'], 'offer__item__color': ['exact'], 'offer__tag__word': ['exact'],
+                        'offer__gender': ['exact'], 'offer__date':['exact'], 'offer__shipping_abroad': ['exact'],
+                        'offer__item__ready_in': ['exact']}
+    search_fields = ['=offer__tag__word', '=offer__owner__nickname', '=offer__item__name']
+    ordering_fields = ['offer__date', 'offer__price']
     serializer_class = FavouriteSerializer
 
     @action(detail=False, methods=['post'], url_name='like_toggle', url_path='(?P<offer_id>\d+)/like_toggle')

@@ -1,7 +1,7 @@
-from rest_framework import status, viewsets
+from rest_framework import status, viewsets, mixins
 from rest_framework.decorators import action
 from rest_framework.generics import get_object_or_404
-from rest_framework.pagination import PageNumberPagination, LimitOffsetPagination
+from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from category.models import Category
@@ -14,11 +14,18 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter, OrderingFilter
 
 
-class OfferViewSet(MultiSerializerMixin, viewsets.ModelViewSet):
+class OfferViewSet(MultiSerializerMixin,
+                   mixins.DestroyModelMixin,
+                   mixins.UpdateModelMixin,
+                   mixins.RetrieveModelMixin,
+                   mixins.CreateModelMixin,
+                   viewsets.GenericViewSet):
     queryset = Offer.objects.filter(owner__active=True)
     filter_backends = [DjangoFilterBackend, OrderingFilter, SearchFilter]
-    ordering_fields = ['price', 'date', 'favourite']
-    # filter_fields = ['price', 'item__color', 'item__ready_in', 'gender']
+    filterset_fields = {'price': ['gte', 'lte'], 'item__color': ['exact'], 'tag__word': ['exact'], 'gender': ['exact'],
+                        'date': ['exact'], 'shipping_abroad': ['exact'], 'item__ready_in': ['exact']}
+    search_fields = ['=tag__word', '=owner__nickname', '=item__name']
+    ordering_fields = ['date', 'price']
     serializers = {
         'create': OfferSerializer,
         'update': OfferSerializer,
@@ -34,34 +41,18 @@ class OfferViewSet(MultiSerializerMixin, viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
 
-    @action(detail=False, methods=['get'], url_name='search', url_path='search')
-    def search(self, request):
-        word = request.GET.get('search')
-        results = Offer.objects.filter(tag__word__contains=word).union(Offer.objects.filter(item__name__contains=word))
-        serializer = self.get_serializer(results, many=True, context={'request': request})
-        paginator = LimitOffsetPagination()
-        data = paginator.paginate_queryset(serializer.data, request)
-        return paginator.get_paginated_response(data=data)
-
-    @action(detail=False, methods=['get'], url_name='offers_by_category', url_path='filter')
-    def offers_by_category(self, request):
+    def list(self, request):
+        queryset = self.filter_queryset(self.get_queryset())
         if len(request.GET) < 1:
             return Response(data={'failed': 'Nie podano kategorii'}, status=status.HTTP_406_NOT_ACCEPTABLE)
         category_name = request.GET.get('category', 'Wszystko')
-
         if category_name == 'Wszystko':
             subcategories_list = Category.objects.all()
         else:
             category = Category.objects.get(name=category_name)
             subcategories_list = category.subcategories()
-        offers = Offer.objects.filter(item__category__in=subcategories_list,  owner__active=True)
-        filters = {}
-        for key in request.GET.keys():
-            if key != 'category' and key != 'limit'  and key != 'offset':
-                if request.GET.get(key) != '':
-                    filters[key] = request.GET.get(key)
-        filtered_offers = offers.filter(**filters)
-        serializer = self.get_serializer(filtered_offers, many=True, context={'request': request})
+        offers = queryset.filter(item__category__in=subcategories_list, owner__active=True)
+        serializer = self.get_serializer(offers, many=True, context={'request': request})
         paginator = LimitOffsetPagination()
         data = paginator.paginate_queryset(serializer.data, request)
         return paginator.get_paginated_response(data=data)
@@ -80,7 +71,7 @@ class OfferViewSet(MultiSerializerMixin, viewsets.ModelViewSet):
             self.permission_classes = [IsAuthenticated]
         if self.action == 'destroy' or self.action == 'update' or self.action == 'partial_update':
             self.permission_classes = [IsAuthenticated, IsObjectOwnerOrAdmin]
-        if self.action == 'offers_by_category' or self.action == 'retrieve' or self.action == 'list'\
+        if self.action == 'offers_by_category' or self.action == 'retrieve' or self.action == 'list' \
                 or self.action == 'user_offers':
             self.permission_classes = [AllowAny]
         return [permission() for permission in self.permission_classes]

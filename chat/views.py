@@ -14,10 +14,11 @@ class ChatViewSet(viewsets.GenericViewSet):
     @action(detail=False, methods=['GET', 'POST'], url_name='messages', url_path=r'(?P<id>\d+)')
     def messages(self, request, **kwargs):
         user_2 = User.objects.get(id=kwargs.get('id'))
-        try:
-            thread = Thread.objects.get_or_create(request.user, user_2)
-        except Thread.DoesNotExist:
-            return Response(data={'message': 'Nie możesz czatować sam ze sobą!'}, status=status.HTTP_406_NOT_ACCEPTABLE)
+        thread = Thread.objects.get_or_create(request.user, user_2)
+        # try:
+        #     thread = Thread.objects.get_or_create(request.user, user_2)
+        # except Thread.DoesNotExist:
+        #     return Response(data={'message': 'Nie możesz czatować sam ze sobą!'}, status=status.HTTP_406_NOT_ACCEPTABLE)
         serializer = ThreadSerializer(thread)
         return Response(data=serializer.data, status=status.HTTP_200_OK)
 
@@ -34,7 +35,7 @@ class ChatViewSet(viewsets.GenericViewSet):
     @action(detail=False, methods=['GET'], url_name='messages', url_path='messages')
     def messages_list(self, request, *args):
         thread_id = request.query_params.get('threadId')
-        messages = Message.objects.filter(thread_id=thread_id).order_by('-date_send')
+        messages = Message.objects.filter(thread_id=thread_id).order_by('date_send')
         serializer = MessageSerializer(messages, many=True, context={'request': request})
         paginator = PageNumberPagination()
         paginator.page_size = 12

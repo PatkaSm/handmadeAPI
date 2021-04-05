@@ -16,7 +16,7 @@ class OfferSerializer(serializers.ModelSerializer):
     class Meta:
         model = Offer
         fields = ['id', 'owner', 'item', 'price', 'tag', 'gender', 'description', 'gallery', 'date',
-                  'shipping_abroad']
+                  'shipping_abroad', 'sold']
         read_only_fields = ['owner']
 
     def create(self, validated_data):
@@ -59,8 +59,9 @@ class OfferSerializer(serializers.ModelSerializer):
         instance.gender = validated_data.get('gender', instance.gender)
         instance.description = validated_data.get('description', instance.description)
         instance.price = validated_data.get('price', instance.price)
-        instance.refresh_from_db()
-
+        instance.shipping_abroad = validated_data.get('shipping_abroad', instance.shipping_abroad)
+        instance.sold = validated_data.get('sold', instance.sold)
+        instance.save()
         return instance
 
 
@@ -76,7 +77,7 @@ class OfferReadSerializer(serializers.ModelSerializer):
         model = Offer
         fields = ['id', 'owner', 'item', 'price', 'tag', 'gender', 'description', 'gallery', 'date',
                   'shipping_abroad', 'is_favourite',
-                  'liked_by']
+                  'liked_by', 'sold']
         read_only_fields = ['owner']
 
     def get_is_favourite(self, obj):

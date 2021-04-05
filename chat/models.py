@@ -11,8 +11,6 @@ def get_or_none(class_model, **kwargs):
 
 class ThreadManager(models.Manager):
     def get_or_create(self, user1, user2):
-        if user1 == user2:
-            raise Thread.DoesNotExist('Nie możesz czatować sam ze sobą')
         thread = get_or_none(Thread, user1=user1, user2=user2)
         if not thread:
             thread = get_or_none(Thread, user1=user2, user2=user1)
